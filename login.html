@@ -216,8 +216,6 @@
                 return;
             }
 
-            await supabaseClient.auth.signOut();
-
             let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
             if (error) {
@@ -238,10 +236,7 @@
         }
 
         async function loginComGoogle() {
-            await supabaseClient.auth.signOut();
-            localStorage.removeItem('usuarioLogado');
-
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: { 
                     redirectTo: window.location.origin + '/index.html',

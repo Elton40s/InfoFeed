@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://edrmehdyusznzdltlhxz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6IxmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -36,12 +36,9 @@ const navBar = document.getElementById('navBar');
 const navLogoEl = document.getElementById('navLogoEl');
 let navAnimated = false;
 
-// Gerencia a exibição da barra superior e dispara a animação 2 segundos após ela aparecer visível
 window.addEventListener('scroll', () => {
     if (window.scrollY > 100) {
         navBar.classList.add('scrolled');
-        
-        // Dispara a animação da barra apenas uma vez, 2 segundos após ela surgir na tela
         if (!navAnimated) {
             navAnimated = true;
             setTimeout(() => {
@@ -81,10 +78,7 @@ async function carregarDadosFaixa() {
             const setaEuro = varEuro >= 0 ? '▲' : '▼';
             euroTexto = `Euro: R$ <span class="tech-dolar">${cotEuro}</span> <span style="color: ${corEuro}; font-weight: 700;">${setaEuro} ${Math.abs(varEuro)}%</span>`;
         }
-    } catch(e) {
-        dolarTexto = "Dólar: Indisponível";
-        euroTexto = "Euro: Indisponível";
-    }
+    } catch(e) {}
 
     try {
         const dowVal = 43250.20; 
@@ -101,11 +95,7 @@ async function carregarDadosFaixa() {
         const ibovVar = -0.32;
         const corIbov = ibovVar >= 0 ? '#16a34a' : '#dc2626';
         ibovTexto = `Ibovespa: <span class="tech-index">${ibovVal.toLocaleString('pt-BR')}</span> <span style="color: ${corIbov}; font-weight: 700;">▼ ${Math.abs(ibovVar)}%</span>`;
-    } catch(e) {
-        dowTexto = "Dow Jones: 43.250 ▲ 0.45%";
-        nasdaqTexto = "Nasdaq: 18.650 ▲ 0.72%";
-        ibovTexto = "Ibovespa: 131.450 ▼ 0.32%";
-    }
+    } catch(e) {}
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
@@ -162,9 +152,11 @@ function fecharMenuPorFora(event) {
     }
 }
 
+// ATUALIZAÇÃO ROBUSTA DA SESSÃO DO SUPABASE (GOOGLE + EMAIL)
 async function atualizarEstadoUsuario() {
     const userNavContainer = document.getElementById('userNavContainer');
     
+    // Captura a sessão ativa do Supabase (inclui o retorno do Google OAuth)
     const { data: { session } } = await supabaseClient.auth.getSession();
     
     if (session && session.user) {
@@ -241,7 +233,6 @@ async function carregarFeed() {
             feedContainer.innerHTML = '<div class="loading-text">Nenhuma notícia encontrada no momento.</div>';
         }
     } catch (error) {
-        console.error("Erro ao carregar do servidor:", error);
         feedContainer.innerHTML = '<div class="loading-text">Erro ao conectar com o servidor de notícias.</div>';
     }
 }
@@ -312,7 +303,7 @@ function abrirConfirmacaoRedirecionamento(urlEncoded, fonteEncoded, logoEncoded)
 
 function alternarCurtida(botao) {
     botao.classList.remove('liked');
-    void botao.offsetWidth; // Reinicia a animação CSS
+    void botao.offsetWidth; // Reinicia a animação CSS do like
     
     botao.classList.toggle('liked');
     const svgHtml = botao.querySelector('svg').outerHTML;
@@ -330,7 +321,7 @@ function abrirCompartilhar(urlEncoded, tituloEncoded) {
     document.getElementById('shareModal').classList.add('active');
 }
 
-function copiarLinkNoticia() {
+function copierLinkNoticia() {
     navigator.clipboard.writeText(linkNoticiaAtual).then(() => {
         alert('Link copiado para a área de transferência!');
         fecharModal('shareModal');
@@ -452,7 +443,6 @@ carregarFeed();
 atualizarEstadoUsuario();
 carregarDadosFaixa();
 
-// Funções para gerenciar os pop-ups do rodapé
 function abrirModalRodape(modalId) {
     document.getElementById(modalId).classList.add('active');
 }
