@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoFeed - Login</title>
+    <!-- Importando o SDK do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #1c1e21;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .login-logo {
+            font-size: 28px;
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: #65676b;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .google-btn:hover {
+            background-color: #f9fafb;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .divider::before { margin-right: 10px; }
+        .divider::after { margin-left: 10px; }
+
+        .form-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #0ea5e9;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #0ea5e9;
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0284c7;
+        }
+
+        .signup-text {
+            font-size: 14px;
+            color: #65676b;
+        }
+
+        .footer-terms {
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            max-width: 380px;
+            margin-top: 30px;
+            line-height: 1.4;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-logo" onclick="window.location.href='index.html'"><span style="color: #1c1e21;">Info</span><span style="color: #0ea5e9;">Feed</span></div>
+        <p class="login-subtitle">Inicie sessão ou cadastre-se para interagir com as publicações.</p>
+
+        <div id="errorContainer" class="error-msg"></div>
+
+        <button class="google-btn" onclick="loginComGoogle()">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.19v3.15C3.21 21.32 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.6H1.19C.43 8.13 0 9.87 0 11.7c0 1.83.43 3.57 1.19 5.1l4.08-2.56z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.21 2.68 1.19 6.6l4.08 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
+            Continuar com o Google
+        </button>
+
+        <div class="divider">ou</div>
+
+        <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" class="form-input" id="loginEmail" placeholder="você@exemplo.com">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+        </div>
+
+        <button class="submit-btn" onclick="entrarOuCadastrar()">Entrar / Cadastrar</button>
+
+        <div class="signup-text">
+            Já tem conta? O sistema cadastra automaticamente se o e-mail for novo!
+        </div>
+    </div>
+
+    <div class="footer-terms">
+        Ao iniciar sessão, você concorda com nossos termos de serviço e política de privacidade.
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://edrmehdyusznzdltlhxz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const errorContainer = document.getElementById('errorContainer');
+
+        async function entrarOuCadastrar() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            errorContainer.innerText = '';
+
+            if (!email || !password) {
+                errorContainer.innerText = 'Preencha o e-mail e a senha.';
+                return;
+            }
+
+            await supabaseClient.auth.signOut();
+
+            let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                let { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
+                if (signUpError) {
+                    errorContainer.innerText = signUpError.message;
+                    return;
+                }
+                data = signUpData;
+            }
+
+            if (data.user) {
+                const apelido = data.user.email.split('@')[0];
+                localStorage.setItem('usuarioLogado', apelido);
+                alert('Login realizado com sucesso!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function loginComGoogle() {
+            await supabaseClient.auth.signOut();
+            localStorage.removeItem('usuarioLogado');
+
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { 
+                    redirectTo: window.location.origin + '/index.html',
+                    queryParams: {
+                        prompt: 'select_account'
+                    }
+                }
+            });
+            if (error) errorContainer.innerText = error.message;
+        }
+    </script>
+</body>
+</html>
