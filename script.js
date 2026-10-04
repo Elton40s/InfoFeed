@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://edrmehdyusznzdltlhxz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6IxmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -311,6 +311,9 @@ function abrirConfirmacaoRedirecionamento(urlEncoded, fonteEncoded, logoEncoded)
 }
 
 function alternarCurtida(botao) {
+    botao.classList.remove('liked');
+    void botao.offsetWidth; // Reinicia a animação CSS
+    
     botao.classList.toggle('liked');
     const svgHtml = botao.querySelector('svg').outerHTML;
     botao.innerHTML = svgHtml + (botao.classList.contains('liked') ? ' Curtido' : ' Curtir');

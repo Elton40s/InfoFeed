@@ -879,3 +879,21 @@ body.dark-mode .weather-ticker-container {
 .footer-contact-email:hover {
     text-decoration: underline;
 }
+
+/* Animação de Curtir com Efeito de Pulsação */
+@keyframes pulseLike {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); background-color: #0284c7; }
+    100% { transform: scale(1); }
+}
+
+.action-btn.liked {
+    background-color: #0ea5e9; 
+    color: #ffffff !important;
+    animation: pulseLike 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.action-btn.liked svg {
+    fill: #ffffff; 
+    stroke: #ffffff;
+}
