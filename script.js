@@ -152,11 +152,8 @@ function fecharMenuPorFora(event) {
     }
 }
 
-// ATUALIZAÇÃO ROBUSTA DA SESSÃO DO SUPABASE (GOOGLE + EMAIL)
 async function atualizarEstadoUsuario() {
     const userNavContainer = document.getElementById('userNavContainer');
-    
-    // Captura a sessão ativa do Supabase (inclui o retorno do Google OAuth)
     const { data: { session } } = await supabaseClient.auth.getSession();
     
     if (session && session.user) {
@@ -301,13 +298,35 @@ function abrirConfirmacaoRedirecionamento(urlEncoded, fonteEncoded, logoEncoded)
     document.getElementById('redirectModal').classList.add('active');
 }
 
+let botaoCurtidaAtivo = null;
+
 function alternarCurtida(botao) {
+    if (botao.classList.contains('liked')) {
+        botaoCurtidaAtivo = botao;
+        document.getElementById('cancelarCurtidaModal').classList.add('active');
+        
+        document.getElementById('confirmarDescurtirBtn').onclick = function() {
+            executarCancelamentoCurtida(botaoCurtidaAtivo);
+            fecharModal('cancelarCurtidaModal');
+        };
+        return;
+    }
+
     botao.classList.remove('liked');
     void botao.offsetWidth; // Reinicia a animação CSS do like
     
-    botao.classList.toggle('liked');
+    botao.classList.add('liked');
     const svgHtml = botao.querySelector('svg').outerHTML;
-    botao.innerHTML = svgHtml + (botao.classList.contains('liked') ? ' Curtido' : ' Curtir');
+    botao.innerHTML = svgHtml + ' Curtido';
+}
+
+function executarCancelamentoCurtida(botao) {
+    if (!botao) return;
+    
+    botao.classList.remove('liked');
+    const svgHtml = botao.querySelector('svg').outerHTML;
+    botao.innerHTML = svgHtml + ' Curtir';
+    botaoCurtidaAtivo = null;
 }
 
 function abrirCompartilhar(urlEncoded, tituloEncoded) {
@@ -321,7 +340,7 @@ function abrirCompartilhar(urlEncoded, tituloEncoded) {
     document.getElementById('shareModal').classList.add('active');
 }
 
-function copierLinkNoticia() {
+function copiarLinkNoticia() {
     navigator.clipboard.writeText(linkNoticiaAtual).then(() => {
         alert('Link copiado para a área de transferência!');
         fecharModal('shareModal');
