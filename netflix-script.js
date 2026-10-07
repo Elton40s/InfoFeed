@@ -186,7 +186,6 @@ let postIdAtual = null;
 
 async function carregarCatalogoNetflix() {
     try {
-        // Endpoint Discover da TMDB filtrando por Watch Provider ID 8 (Netflix) no Brasil (BR)
         const url = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_API_KEY}&with_watch_providers=8&watch_region=BR&language=pt-BR&sort_by=popularity.desc`;
         
         const res = await fetch(url);
@@ -213,7 +212,19 @@ async function carregarCatalogoNetflix() {
                 let logoStreaming = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
                 let streamingUrl = `https://www.netflix.com/search?q=${encodeURIComponent(titulo)}`;
 
-                // Busca o trailer real no YouTube via TMDB
+                // Busca detalhes para pegar a produtora/distribuidora real
+                try {
+                    const resDetalhes = await fetch(`https://api.themoviedb.org/3/movie/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`);
+                    const dadosDetalhes = await resDetalhes.json();
+                    if (dadosDetalhes.production_companies && dadosDetalhes.production_companies.length > 0) {
+                        const prod = dadosDetalhes.production_companies[0];
+                        nomeProdutora = prod.name;
+                        if (prod.logo_path) {
+                            logoProdutora = `https://image.tmdb.org/t/p/w200${prod.logo_path}`;
+                        }
+                    }
+                } catch (e) {}
+
                 try {
                     const resVideos = await fetch(`https://api.themoviedb.org/3/movie/${item.id}/videos?api_key=${TMDB_API_KEY}&language=pt-BR`);
                     const dadosVideos = await resVideos.json();
@@ -235,38 +246,37 @@ async function carregarCatalogoNetflix() {
     }
 }
 
-function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoUrl, trailerUrl, postId, voteAverage, nomeStreaming, logoStreaming, streamingUrl) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoProdutora, trailerUrl, postId, voteAverage, nomeStreaming, logoStreaming, streamingUrl) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
     const urlEncoded = encodeURIComponent(trailerUrl);
     const tituloEncoded = encodeURIComponent(titulo);
-    const logoEncoded = encodeURIComponent(logoUrl);
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
 
     let streamingHtml = '';
-    if (nomeStreaming && logoStreaming) {
+    if (nomeStreaming && streamingUrl) {
         const streamUrlEncoded = encodeURIComponent(streamingUrl);
         const streamNomeEncoded = encodeURIComponent(`Assistir na Netflix`);
         const streamLogoEncoded = encodeURIComponent(logoStreaming);
         
         streamingHtml = `
-            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Assistir na ${nomeStreaming}">
-                <img src="${logoStreaming}" alt="${nomeStreaming}" class="streaming-avatar" onerror="this.style.display='none'">
+            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Assistir na Netflix">
+                <svg class="netflix-play-btn-real" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             </div>
         `;
     }
 
     articleEl.innerHTML = `
         <header class="post-header">
-            <img src="${logoUrl}" alt="Logo ${nomeProdutora}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(nomeProdutora)}&background=0ea5e9&color=fff'">
+            <img src="${logoProdutora}" alt="Logo ${nomeProdutora}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(nomeProdutora)}&background=E50914&color=fff'">
             <div class="author-info">
                 <span class="author-name">${nomeProdutora}</span>
                 <span class="post-time">${tipo} • ${ano}${notaFormatada}</span>
             </div>
             ${streamingHtml}
         </header>
-        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${encodeURIComponent(logoProdutora)}')">
             <p class="post-text">
                 <strong>${titulo}</strong>
                 ${sinopse}
@@ -324,7 +334,7 @@ function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
     const imgLogo = document.getElementById('redirectLogo');
     imgLogo.src = logo;
     imgLogo.onerror = function() {
-        this.src = `https://ui-avatars.com/api/?name=Netflix&background=0ea5e9&color=fff`;
+        this.src = `https://ui-avatars.com/api/?name=Netflix&background=E50914&color=fff`;
     };
 
     document.getElementById('redirectSource').innerText = titulo;
