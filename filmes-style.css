@@ -502,3 +502,34 @@ body {
         max-height: 480px;
     }
 }
+
+/* ÍCONE DE PLAY PROFISSIONAL E MODERNO COM PULSAÇÃO VERMELHA */
+.netflix-play-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: rgba(229, 9, 20, 0.1);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: netflixPulse 5s ease-in-out infinite;
+}
+
+.netflix-play-avatar svg {
+    width: 20px;
+    height: 20px;
+    fill: #E50914;
+    margin-left: 2px; /* Pequeno ajuste visual para centralizar o triângulo do play */
+}
+
+@keyframes netflixPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(229, 9, 20, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(229, 9, 20, 0);
+        transform: scale(1.06);
+    }
+}
