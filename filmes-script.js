@@ -217,7 +217,7 @@ async function carregarFilmesSeries() {
                     const dadosDetalhes = await resDetalhes.json();
 
                     if (dadosDetalhes.production_companies && dadosDetalhes.production_companies.length > 0) {
-                        const prod = dadosDetalhes.production_companies[0];
+                        const prod = dadosDetalhes.production_companies.find(p => p.logo_path) || dadosDetalhes.production_companies[0];
                         nomeProdutora = prod.name;
                         if (prod.logo_path) {
                             logoProdutora = `https://image.tmdb.org/t/p/w200${prod.logo_path}`;
@@ -233,6 +233,7 @@ async function carregarFilmesSeries() {
                         }
                     }
 
+                    // Buscar Provedores de Streaming reais na TMDB (Watch Providers para o BR)
                     const resWatch = await fetch(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${TMDB_API_KEY}`);
                     const dadosWatch = await resWatch.json();
 
@@ -254,14 +255,20 @@ async function carregarFilmesSeries() {
                             streamingUrl = provBr.link ? provBr.link : `https://www.google.com/search?q=assistir+${encodeURIComponent(titulo)}+no+${encodeURIComponent(nomeStreaming)}`;
                         }
                     }
-                } catch (err) {}
 
-                // FALLBACK INTELIGENTE: Se a TMDB não retornou nenhum streaming, aplicamos um padrão para garantir o botão
-                if (!nomeStreaming || !logoStreaming) {
-                    nomeStreaming = "Streaming Online";
-                    logoStreaming = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
-                    streamingUrl = `https://www.google.com/search?q=assistir+${encodeURIComponent(titulo)}+online+streaming`;
-                }
+                    // SE A TMDB NÃO TIVER O STREAMING CADASTRADO:
+                    // Em vez de chutar uma logo aleatória, verificamos se há uma emissora/canal original (networks) ou usamos os dados da própria produtora oficial (ex: Marvel Studios, HBO, etc.)
+                    if (!nomeStreaming || !logoStreaming) {
+                        if (dadosDetalhes.networks && dadosDetalhes.networks.length > 0 && dadosDetalhes.networks[0].logo_path) {
+                            nomeStreaming = dadosDetalhes.networks[0].name;
+                            logoStreaming = `https://image.tmdb.org/t/p/w200${dadosDetalhes.networks[0].logo_path}`;
+                        } else {
+                            nomeStreaming = nomeProdutora;
+                            logoStreaming = logoProdutora;
+                        }
+                        streamingUrl = `https://www.google.com/search?q=assistir+${encodeURIComponent(titulo)}+online`;
+                    }
+                } catch (err) {}
 
                 criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average, nomeStreaming, logoStreaming, streamingUrl);
             }
@@ -285,11 +292,11 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     let streamingHtml = '';
     if (nomeStreaming && logoStreaming) {
         const streamUrlEncoded = encodeURIComponent(streamingUrl);
-        const streamNomeEncoded = encodeURIComponent(`Assistir em ${nomeStreaming}`);
+        const streamNomeEncoded = encodeURIComponent(`Acessar: ${nomeStreaming}`);
         const streamLogoEncoded = encodeURIComponent(logoStreaming);
         
         streamingHtml = `
-            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Disponível em: ${nomeStreaming}">
+            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Distribuidor / Canal: ${nomeStreaming}">
                 <img src="${logoStreaming}" alt="${nomeStreaming}" class="streaming-avatar" onerror="this.style.display='none'">
             </div>
         `;
@@ -343,11 +350,11 @@ function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
         divModal.innerHTML = `
             <div class="modal-card redirect-modal-card">
                 <div class="redirect-logo-wrapper">
-                    <img id="redirectLogo" src="" alt="Logo Produtora" class="redirect-logo">
+                    <img id="redirectLogo" src="" alt="Logo Mídia" class="redirect-logo">
                 </div>
                 <div class="redirect-source-name" id="redirectSource">Título do Filme</div>
                 <p class="redirect-message">
-                    Você será direcionado para assistir ao trailer oficial ou acessar o streaming. Deseja continuar?
+                    Você será direcionado para o link externo correspondente. Deseja continuar?
                 </p>
                 <div class="redirect-actions">
                     <button class="btn-cancel" onclick="fecharModal('redirectModal')">Cancelar</button>
@@ -362,7 +369,7 @@ function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
     const imgLogo = document.getElementById('redirectLogo');
     imgLogo.src = logo;
     imgLogo.onerror = function() {
-        this.src = `https://ui-avatars.com/api/?name=Mídia&background=0ea5e9&color=fff`;
+        this.src = `https://ui-avatars.com/api/?name=Midia&background=0ea5e9&color=fff`;
     };
 
     document.getElementById('redirectSource').innerText = titulo;
