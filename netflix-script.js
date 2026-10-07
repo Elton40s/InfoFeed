@@ -293,6 +293,25 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     }
 }
 
+// Usa IntersectionObserver para disparar o temporizador de 2 segundos APENAS quando o card aparecer na tela
+    if (article.image) {
+        const observerCard = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        const btnEl = document.getElementById(uniqueBtnId);
+                        if (btnEl) {
+                            btnEl.classList.add('visivel');
+                        }
+                    }, 6000);
+                    observer.unobserve(entry.target); // Para de observar após ativar
+                }
+            });
+        }, { threshold: 0.2 }); // Ativa quando pelo menos 20% do card estiver visível
+
+        observerCard.observe(articleEl);
+    }
+
 function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
     const url = decodeURIComponent(urlEncoded);
     const titulo = decodeURIComponent(tituloEncoded);
