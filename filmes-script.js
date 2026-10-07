@@ -347,7 +347,7 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
         setInterval(() => {
             alternarTexto = !alternarTexto;
             btnEl.innerText = alternarTexto ? "trailer" : "assista";
-        }, 5000);
+        }, 3000);
     }
 }
 
