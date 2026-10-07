@@ -304,7 +304,7 @@ body {
     transition: transform 0.2s ease;
 }
 
-.streaming-badge-container:hover { transform: scale(1.08); }
+.streaming-badge-container:hover { transform: scale(1.12); }
 
 .streaming-avatar {
     width: 38px;
@@ -509,8 +509,8 @@ body {
     height: 32px;
     fill: #E50914;
     cursor: pointer;
-    transition: transform 0.2s ease;
     animation: netflixPlaySoftPulse 15s ease-in-out infinite;
+    filter: drop-shadow(0 0 2px rgba(229, 9, 20, 0.3));
 }
 
 .netflix-play-btn-real:hover {
@@ -521,11 +521,11 @@ body {
 @keyframes netflixPlaySoftPulse {
     0%, 85%, 100% {
         transform: scale(1);
-        opacity: 0.95;
+        opacity: 0.9;
     }
     90%, 95% {
-        transform: scale(1.12);
+        transform: scale(1.15);
         opacity: 1;
-        filter: drop-shadow(0 0 6px rgba(229, 9, 20, 0.6));
+        filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.7));
     }
 }

@@ -208,11 +208,8 @@ async function carregarCatalogoNetflix() {
                 let nomeProdutora = "Netflix Originals";
                 let logoProdutora = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
                 let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' netflix trailer legendado')}`;
-                let nomeStreaming = "Netflix";
-                let logoStreaming = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
                 let streamingUrl = `https://www.netflix.com/search?q=${encodeURIComponent(titulo)}`;
 
-                // Busca detalhes para pegar a produtora/distribuidora real
                 try {
                     const resDetalhes = await fetch(`https://api.themoviedb.org/3/movie/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`);
                     const dadosDetalhes = await resDetalhes.json();
@@ -236,7 +233,7 @@ async function carregarCatalogoNetflix() {
                     }
                 } catch (err) {}
 
-                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average, nomeStreaming, logoStreaming, streamingUrl);
+                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average, streamingUrl);
             }
         } else {
             feedContainer.innerHTML = '<div class="loading-text">Nenhum título encontrado para a Netflix no momento.</div>';
@@ -246,7 +243,7 @@ async function carregarCatalogoNetflix() {
     }
 }
 
-function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoProdutora, trailerUrl, postId, voteAverage, nomeStreaming, logoStreaming, streamingUrl) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoProdutora, trailerUrl, postId, voteAverage, streamingUrl) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
@@ -255,10 +252,10 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
 
     let streamingHtml = '';
-    if (nomeStreaming && streamingUrl) {
+    if (streamingUrl) {
         const streamUrlEncoded = encodeURIComponent(streamingUrl);
-        const streamNomeEncoded = encodeURIComponent(`Assistir na Netflix`);
-        const streamLogoEncoded = encodeURIComponent(logoStreaming);
+        const streamNomeEncoded = encodeURIComponent(`Assistir ${titulo} na Netflix`);
+        const streamLogoEncoded = encodeURIComponent('https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico');
         
         streamingHtml = `
             <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Assistir na Netflix">
@@ -292,7 +289,7 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
                 <svg viewBox="0 0 24 24" style="fill:none; stroke:currentColor;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                 Comentários
             </button>
-            <button class="action-btn" onclick="abrirCompartilhar('${encodeURIComponent(trailerUrl)}', '${encodeURIComponent('Assista a ' + titulo + ' na Netflix')}">
+            <button class="action-btn" onclick="abrirCompartilhar('${urlEncoded}', '${encodeURIComponent('Assista a ' + titulo + ' na Netflix')}">
                 <svg viewBox="0 0 24 24" style="fill:none; stroke:currentColor;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 Compartilhar
             </button>
