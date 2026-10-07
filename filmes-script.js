@@ -4,7 +4,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TMDB_API_KEY = '1792a76c814b3057e6b8b05d4eee27d5';
 
-// Animação imediata na logo principal ao carregar a página
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         document.querySelectorAll('.logo-animada-principal').forEach(el => {
@@ -36,25 +35,6 @@ function alternarModoNoturno(event) {
     fecharMenu();
 }
 
-const navBar = document.getElementById('navBar');
-const navLogoEl = document.getElementById('navLogoEl');
-let navAnimated = false;
-
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 100) {
-        navBar.classList.add('scrolled');
-        if (!navAnimated) {
-            navAnimated = true;
-            setTimeout(() => {
-                navLogoEl.classList.add('animate-logo');
-            }, 2000);
-        }
-    } else {
-        navBar.classList.remove('scrolled');
-    }
-});
-
-// Faixa de Cotações e Clima (Padrão Index)
 async function carregarDadosFaixa() {
     const tickerEl = document.getElementById('weatherTickerText');
     let climaTexto = "Clima local indisponível &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;";
@@ -203,7 +183,6 @@ const feedContainer = document.getElementById('feedContainer');
 let linkNoticiaAtual = "";
 let postIdAtual = null;
 
-// Carregar Filmes e Séries da TMDB com Trailers e Logos
 async function carregarFilmesSeries() {
     try {
         const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_API_KEY}&language=pt-BR`);
@@ -223,10 +202,9 @@ async function carregarFilmesSeries() {
                 
                 const postId = `media_${item.id}`;
 
-                // Buscar detalhes extras (como a produtora/distribuidora e vídeos/trailers)
                 let logoProdutora = "https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_1-5bdc75aaebeb75dc7ae79426ddd9be3b2fa1e37253508413099d32325c4084f0.svg";
                 let nomeProdutora = tipo === 'Série' ? "TMDB Séries" : "TMDB Filmes";
-                let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' trailer legendado')} `;
+                let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' trailer legendado')}`;
 
                 try {
                     const endpointDetalhes = `https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
@@ -241,7 +219,6 @@ async function carregarFilmesSeries() {
                         }
                     }
 
-                    // Buscar Trailer no YouTube via TMDB Videos
                     const resVideos = await fetch(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/videos?api_key=${TMDB_API_KEY}&language=pt-BR`);
                     const dadosVideos = await resVideos.json();
                     if (dadosVideos.results && dadosVideos.results.length > 0) {
@@ -252,7 +229,7 @@ async function carregarFilmesSeries() {
                     }
                 } catch (err) {}
 
-                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId);
+                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average);
             }
         } else {
             feedContainer.innerHTML = '<div class="loading-text">Nenhum filme ou série encontrado no momento.</div>';
@@ -262,20 +239,21 @@ async function carregarFilmesSeries() {
     }
 }
 
-function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoUrl, trailerUrl, postId) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoUrl, trailerUrl, postId, voteAverage) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
     const urlEncoded = encodeURIComponent(trailerUrl);
     const tituloEncoded = encodeURIComponent(titulo);
     const logoEncoded = encodeURIComponent(logoUrl);
+    const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
 
     articleEl.innerHTML = `
         <header class="post-header">
             <img src="${logoUrl}" alt="Logo ${nomeProdutora}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(nomeProdutora)}&background=0ea5e9&color=fff'">
             <div class="author-info">
                 <span class="author-name">${nomeProdutora}</span>
-                <span class="post-time">${tipo} • ${ano}</span>
+                <span class="post-time">${tipo} • ${ano}${notaFormatada}</span>
             </div>
         </header>
         <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
@@ -304,13 +282,11 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     feedContainer.appendChild(articleEl);
 }
 
-// Modal de Confirmação para Assistir ao Trailer (Padrão Redirecionamento Index)
 function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
     const url = decodeURIComponent(urlEncoded);
     const titulo = decodeURIComponent(tituloEncoded);
     const logo = decodeURIComponent(logoEncoded);
 
-    // Cria dinamicamente ou reaproveita o modal de redirecionamento idêntico ao index se não existir
     let modal = document.getElementById('redirectModal');
     if (!modal) {
         const divModal = document.createElement('div');

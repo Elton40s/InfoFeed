@@ -37,25 +37,22 @@ body {
 }
 
 .top-nav {
-    position: fixed;
+    position: relative; /* Barra estática no topo, sem fixar ao rolar */
     top: 0;
     left: 0;
     width: 100%;
     background-color: var(--nav-bg); 
-    backdrop-filter: blur(12px); 
-    -webkit-backdrop-filter: blur(12px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 24px;
     box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
     z-index: 1200;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
 .top-nav.scrolled {
-    transform: translateY(0); 
+    transform: none; 
 }
 
 /* ANIMAÇÃO DA LOGO (INFO + FEED EM SEQUÊNCIA) */
@@ -251,7 +248,6 @@ body.dark-mode .animate-logo .logo-feed {
     cursor: pointer;
 }
 
-/* Estilo para o ícone de logout na barra superior */
 .logout-icon-btn {
     background: none;
     border: none;
@@ -282,7 +278,7 @@ body.dark-mode .animate-logo .logo-feed {
 
 .hero-section {
     text-align: center;
-    padding: 80px 20px 20px 20px;
+    padding: 40px 20px 20px 20px;
     max-width: 500px;
     margin-bottom: 10px;
 }
@@ -300,7 +296,6 @@ body.dark-mode .animate-logo .logo-feed {
     margin-bottom: 20px;
 }
 
-/* FAIXA ANIMADA COM CORES E VELOCIDADE AJUSTADA */
 .weather-ticker-container {
     width: 100%;
     max-width: 500px;
@@ -478,16 +473,6 @@ body.dark-mode .weather-ticker-container {
     color: #0ea5e9;
 }
 
-.action-btn.liked {
-    background-color: #0ea5e9; 
-    color: #ffffff !important;
-}
-
-.action-btn.liked svg {
-    fill: #ffffff; 
-    stroke: #ffffff;
-}
-
 .action-btn svg {
     width: 18px;
     height: 18px;
@@ -505,7 +490,6 @@ body.dark-mode .weather-ticker-container {
     font-size: 16px;
 }
 
-/* MODAIS */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -629,10 +613,6 @@ body.dark-mode .weather-ticker-container {
     transition: background-color 0.2s;
 }
 
-.btn-cancel:hover {
-    opacity: 0.8;
-}
-
 .btn-confirm {
     flex: 1;
     background-color: #0ea5e9;
@@ -654,7 +634,7 @@ body.dark-mode .weather-ticker-container {
     background-color: #0284c7;
 }
 
-.modal-input, .modal-textarea {
+.modal-input {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
@@ -663,24 +643,6 @@ body.dark-mode .weather-ticker-container {
     border-radius: 6px;
     font-size: 14px;
     outline: none;
-}
-
-.modal-submit {
-    background-color: #0ea5e9;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    text-align: center;
-    text-decoration: none;
-    display: block;
-}
-
-.modal-submit:hover {
-    background-color: #0284c7;
 }
 
 .share-icons-container {
@@ -739,13 +701,10 @@ body.dark-mode .weather-ticker-container {
     font-weight: normal;
 }
 
-/* ========================================================================= */
-/* LAYOUT EXCLUSIVO PARA PC / MONITORES                                      */
-/* ========================================================================= */
 @media (min-width: 1024px) {
     .hero-section {
         max-width: 950px;
-        padding-top: 110px;
+        padding-top: 40px;
     }
 
     .hero-title {
@@ -786,9 +745,6 @@ body.dark-mode .weather-ticker-container {
     }
 }
 
-/* ========================================================================= */
-/* ESTILOS DO RODAPÉ E MODAIS ESCUROS                                      */
-/* ========================================================================= */
 .site-footer {
     width: 100%;
     background-color: #000000;
@@ -838,7 +794,6 @@ body.dark-mode .weather-ticker-container {
     margin-top: 4px;
 }
 
-/* Pop-ups translúcidos em tema escuro para o rodapé */
 .footer-modal-card {
     background-color: rgba(18, 18, 18, 0.85) !important;
     backdrop-filter: blur(16px) !important;
@@ -880,7 +835,6 @@ body.dark-mode .weather-ticker-container {
     text-decoration: underline;
 }
 
-/* Animação de Curtir com Efeito de Pulsação */
 @keyframes pulseLike {
     0% { transform: scale(1); }
     50% { transform: scale(1.25); background-color: #0284c7; }
