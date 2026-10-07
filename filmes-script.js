@@ -13,6 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarFilmesSeries();
     carregarDadosFaixa();
     atualizarEstadoUsuario();
+    criarBotaoFlutuanteMenu();
 });
 
 if (localStorage.getItem('modoNoturno') === 'ativo') {
@@ -205,6 +206,10 @@ async function carregarFilmesSeries() {
                 let logoProdutora = "https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_1-5bdc75aaebeb75dc7ae79426ddd9be3b2fa1e37253508413099d32325c4084f0.svg";
                 let nomeProdutora = tipo === 'Série' ? "TMDB Séries" : "TMDB Filmes";
                 let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' trailer legendado')}`;
+                
+                let nomeStreaming = "";
+                let logoStreaming = "";
+                let streamingUrl = "";
 
                 try {
                     const endpointDetalhes = `https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
@@ -227,9 +232,31 @@ async function carregarFilmesSeries() {
                             trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
                         }
                     }
+
+                    const resWatch = await fetch(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${TMDB_API_KEY}`);
+                    const dadosWatch = await resWatch.json();
+
+                    if (dadosWatch.results && dadosWatch.results.BR) {
+                        const provBr = dadosWatch.results.BR;
+                        let provedorEscolhido = null;
+
+                        if (provBr.flatrate && provBr.flatrate.length > 0) {
+                            provedorEscolhido = provBr.flatrate[0];
+                        } else if (provBr.rent && provBr.rent.length > 0) {
+                            provedorEscolhido = provBr.rent[0];
+                        }
+
+                        if (provedorEscolhido) {
+                            nomeStreaming = provedorEscolhido.provider_name;
+                            if (provedorEscolhido.logo_path) {
+                                logoStreaming = `https://image.tmdb.org/t/p/w200${provedorEscolhido.logo_path}`;
+                            }
+                            streamingUrl = provBr.link ? provBr.link : `https://www.google.com/search?q=assistir+${encodeURIComponent(titulo)}+no+${encodeURIComponent(nomeStreaming)}`;
+                        }
+                    }
                 } catch (err) {}
 
-                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average);
+                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average, nomeStreaming, logoStreaming, streamingUrl);
             }
         } else {
             feedContainer.innerHTML = '<div class="loading-text">Nenhum filme ou série encontrado no momento.</div>';
@@ -239,7 +266,7 @@ async function carregarFilmesSeries() {
     }
 }
 
-function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoUrl, trailerUrl, postId, voteAverage) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoUrl, trailerUrl, postId, voteAverage, nomeStreaming, logoStreaming, streamingUrl) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
@@ -248,6 +275,19 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     const logoEncoded = encodeURIComponent(logoUrl);
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
 
+    let streamingHtml = '';
+    if (nomeStreaming && logoStreaming) {
+        const streamUrlEncoded = encodeURIComponent(streamingUrl);
+        const streamNomeEncoded = encodeURIComponent(`Assistir em ${nomeStreaming}`);
+        const streamLogoEncoded = encodeURIComponent(logoStreaming);
+        
+        streamingHtml = `
+            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Disponível em: ${nomeStreaming}">
+                <img src="${logoStreaming}" alt="${nomeStreaming}" class="streaming-avatar" onerror="this.style.display='none'">
+            </div>
+        `;
+    }
+
     articleEl.innerHTML = `
         <header class="post-header">
             <img src="${logoUrl}" alt="Logo ${nomeProdutora}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(nomeProdutora)}&background=0ea5e9&color=fff'">
@@ -255,6 +295,7 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
                 <span class="author-name">${nomeProdutora}</span>
                 <span class="post-time">${tipo} • ${ano}${notaFormatada}</span>
             </div>
+            ${streamingHtml}
         </header>
         <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
             <p class="post-text">
@@ -299,11 +340,11 @@ function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
                 </div>
                 <div class="redirect-source-name" id="redirectSource">Título do Filme</div>
                 <p class="redirect-message">
-                    Você será direcionado para assistir ao trailer oficial no YouTube. Deseja continuar?
+                    Você será direcionado para assistir ao trailer oficial ou acessar o streaming. Deseja continuar?
                 </p>
                 <div class="redirect-actions">
                     <button class="btn-cancel" onclick="fecharModal('redirectModal')">Cancelar</button>
-                    <a id="redirectConfirmBtn" href="#" target="_blank" class="btn-confirm" onclick="fecharModal('redirectModal')">Assistir Trailer</a>
+                    <a id="redirectConfirmBtn" href="#" target="_blank" class="btn-confirm" onclick="fecharModal('redirectModal')">Prosseguir</a>
                 </div>
             </div>
         `;
@@ -314,12 +355,12 @@ function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
     const imgLogo = document.getElementById('redirectLogo');
     imgLogo.src = logo;
     imgLogo.onerror = function() {
-        this.src = `https://ui-avatars.com/api/?name=Trailer&background=0ea5e9&color=fff`;
+        this.src = `https://ui-avatars.com/api/?name=Mídia&background=0ea5e9&color=fff`;
     };
 
     document.getElementById('redirectSource').innerText = titulo;
     document.getElementById('redirectConfirmBtn').href = url;
-    document.getElementById('redirectConfirmBtn').innerText = "Assistir Trailer";
+    document.getElementById('redirectConfirmBtn').innerText = "Acessar";
 
     modal.classList.add('active');
 }
@@ -493,128 +534,14 @@ function fecharModalRodape(modalId) {
 }
 
 // =========================================================================
-// COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL AO ROLAR A PÁGINA
-// =========================================================================
-window.addEventListener('DOMContentLoaded', () => {
-    criarBotaoFlutuanteMenu();
-});
-
-function criarBotaoFlutuanteMenu() {
-    // Cria o elemento do botão flutuante se ele ainda não existir
-    if (document.getElementById('floatingMenuBtn')) return;
-
-    const floatBtn = document.createElement('button');
-    floatBtn.id = 'floatingMenuBtn';
-    floatBtn.className = 'floating-menu-btn';
-    floatBtn.innerHTML = `
-        <svg viewBox="0 0 24 24">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-    `;
-    floatBtn.setAttribute('title', 'Menu');
-    document.body.appendChild(floatBtn);
-
-    // Controla aparecimento ao rolar a página para baixo
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 150) {
-            floatBtn.classList.add('active-float');
-        } else {
-            floatBtn.classList.remove('active-float');
-        }
-    });
-
-    // Ação ao clicar: abre o menu hambúrguer principal
-    floatBtn.addEventListener('click', (e) => {
-        // Evita abrir se o usuário estava apenas a arrastar o botão
-        if (floatBtn.getAttribute('data-dragging') === 'true') return;
-        toggleMenu();
-    });
-
-    // Lógica para permitir arrastar o botão para qualquer lugar da tela (Mouse e Touch)
-    let isDragging = false;
-    let startX, startY, initialX, initialY;
-
-    const dragStart = (e) => {
-        isDragging = false;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        startX = clientX;
-        startY = clientY;
-        
-        const rect = floatBtn.getBoundingClientRect();
-        initialX = rect.left;
-        initialY = rect.top;
-
-        floatBtn.setAttribute('data-dragging', 'false');
-
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-        document.addEventListener('touchmove', dragMove, { passive: false });
-        document.addEventListener('touchend', dragEnd);
-    };
-
-    const dragMove = (e) => {
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-            isDragging = true;
-            floatBtn.setAttribute('data-dragging', 'true');
-        }
-
-        if (isDragging) {
-            e.preventDefault();
-            let newX = initialX + dx;
-            let newY = initialY + dy;
-
-            // Limites da tela
-            const maxX = window.innerWidth - floatBtn.offsetWidth;
-            const maxY = window.innerHeight - floatBtn.offsetHeight;
-
-            newX = Math.max(10, Math.min(newX, maxX - 10));
-            newY = Math.max(10, Math.min(newY, maxY - 10));
-
-            floatBtn.style.left = `${newX}px`;
-            floatBtn.style.top = `${newY}px`;
-            floatBtn.style.right = 'auto'; // Remove o right fixo para liberar o posicionamento livre
-        }
-    };
-
-    const dragEnd = () => {
-        document.removeEventListener('mousemove', dragMove);
-        document.removeEventListener('mouseup', dragEnd);
-        document.removeEventListener('touchmove', dragMove);
-        document.removeEventListener('touchend', dragEnd);
-        
-        setTimeout(() => {
-            floatBtn.setAttribute('data-dragging', 'false');
-        }, 50);
-    };
-
-    floatBtn.addEventListener('mousedown', dragStart);
-    floatBtn.addEventListener('touchstart', dragStart, { passive: true });
-}
-
-// =========================================================================
 // COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL COM ANIMAÇÃO DE X E PULSAR
 // =========================================================================
-window.addEventListener('DOMContentLoaded', () => {
-    criarBotaoFlutuanteMenu();
-});
-
 function criarBotaoFlutuanteMenu() {
     if (document.getElementById('floatingMenuBtn')) return;
 
     const floatBtn = document.createElement('button');
     floatBtn.id = 'floatingMenuBtn';
     floatBtn.className = 'floating-menu-btn';
-    // SVG estruturado com classes nas linhas para girar formando o X
     floatBtn.innerHTML = `
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6" class="float-icon-line line-1"></line>
@@ -627,15 +554,12 @@ function criarBotaoFlutuanteMenu() {
 
     let pulseTimer = null;
 
-    // Controla aparecimento ao rolar a página para baixo e gerencia o timer de 5s para pulsar
     window.addEventListener('scroll', () => {
         if (window.scrollY > 150) {
             floatBtn.classList.add('active-float');
             
-            // Inicia o timer de 5 segundos se já não estiver rodando
             if (!pulseTimer && !floatBtn.classList.contains('pulsing')) {
                 pulseTimer = setTimeout(() => {
-                    // Só pulsa se o menu estiver fechado
                     if (!document.getElementById('menuOverlay').classList.contains('active')) {
                         floatBtn.classList.add('pulsing');
                     }
@@ -649,12 +573,11 @@ function criarBotaoFlutuanteMenu() {
         }
     });
 
-    // Monitora o estado do menu overlay para atualizar o botão flutuante para "X" ou remover a pulsação ao clicar
     const observer = new MutationObserver(() => {
         const menuAberto = document.getElementById('menuOverlay').classList.contains('active');
         if (menuAberto) {
             floatBtn.classList.add('is-open');
-            floatBtn.classList.remove('pulsing'); // Para de pulsar quando abre
+            floatBtn.classList.remove('pulsing');
             clearTimeout(pulseTimer);
             pulseTimer = null;
         } else {
@@ -663,18 +586,15 @@ function criarBotaoFlutuanteMenu() {
     });
     observer.observe(document.getElementById('menuOverlay'), { attributes: true, attributeFilter: ['class'] });
 
-    // Ação ao clicar no botão flutuante
     floatBtn.addEventListener('click', (e) => {
         if (floatBtn.getAttribute('data-dragging') === 'true') return;
         
-        // Remove o efeito de pulsar imediatamente ao interagir
         floatBtn.classList.remove('pulsing');
         clearTimeout(pulseTimer);
         
         toggleMenu();
     });
 
-    // Lógica para arrastar o botão livremente pela tela
     let isDragging = false;
     let startX, startY, initialX, initialY;
 
