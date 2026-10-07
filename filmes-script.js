@@ -256,6 +256,13 @@ async function carregarFilmesSeries() {
                     }
                 } catch (err) {}
 
+                // FALLBACK INTELIGENTE: Se a TMDB não retornou nenhum streaming, aplicamos um padrão para garantir o botão
+                if (!nomeStreaming || !logoStreaming) {
+                    nomeStreaming = "Streaming Online";
+                    logoStreaming = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
+                    streamingUrl = `https://www.google.com/search?q=assistir+${encodeURIComponent(titulo)}+online+streaming`;
+                }
+
                 criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average, nomeStreaming, logoStreaming, streamingUrl);
             }
         } else {
