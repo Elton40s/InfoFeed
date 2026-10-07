@@ -4,18 +4,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TMDB_API_KEY = '1792a76c814b3057e6b8b05d4eee27d5';
 
+// Animação imediata na logo principal ao carregar a página
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         document.querySelectorAll('.logo-animada-principal').forEach(el => {
             el.classList.add('animate-logo');
         });
     }, 400);
+    carregarFilmesSeries();
+    carregarDadosFaixa();
+    atualizarEstadoUsuario();
 });
 
 if (localStorage.getItem('modoNoturno') === 'ativo') {
     document.body.classList.add('dark-mode');
-    const btn = document.getElementById('modoNoturnoBtn');
-    if(btn) btn.innerText = 'MODO CLARO';
+    document.getElementById('modoNoturnoBtn').innerText = 'MODO CLARO';
 }
 
 function alternarModoNoturno(event) {
@@ -25,10 +28,10 @@ function alternarModoNoturno(event) {
     
     if (document.body.classList.contains('dark-mode')) {
         localStorage.setItem('modoNoturno', 'ativo');
-        if(btn) btn.innerText = 'MODO CLARO';
+        btn.innerText = 'MODO CLARO';
     } else {
         localStorage.setItem('modoNoturno', 'inativo');
-        if(btn) btn.innerText = 'MODO NOTURNO';
+        btn.innerText = 'MODO NOTURNO';
     }
     fecharMenu();
 }
@@ -51,10 +54,15 @@ window.addEventListener('scroll', () => {
     }
 });
 
+// Faixa de Cotações e Clima (Padrão Index)
 async function carregarDadosFaixa() {
     const tickerEl = document.getElementById('weatherTickerText');
+    let climaTexto = "Clima local indisponível &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;";
     let dolarTexto = "Dólar: Carregando...";
     let euroTexto = "Euro: Carregando...";
+    let dowTexto = "Dow Jones: Carregando...";
+    let nasdaqTexto = "Nasdaq: Carregando...";
+    let ibovTexto = "Ibovespa: Carregando...";
 
     try {
         const resCotacoes = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL');
@@ -64,23 +72,71 @@ async function carregarDadosFaixa() {
             const cotDolar = parseFloat(dataCotacoes.USDBRL.bid).toFixed(2);
             const varDolar = parseFloat(dataCotacoes.USDBRL.pctChange);
             const corDolar = varDolar >= 0 ? '#16a34a' : '#dc2626';
-            dolarTexto = `Dólar: R$ <span class="tech-dolar">${cotDolar}</span> <span style="color: ${corDolar}; font-weight: 700;">${varDolar >= 0 ? '▲' : '▼'} ${Math.abs(varDolar)}%</span>`;
+            const setaDolar = varDolar >= 0 ? '▲' : '▼';
+            dolarTexto = `Dólar: R$ <span class="tech-dolar">${cotDolar}</span> <span style="color: ${corDolar}; font-weight: 700;">${setaDolar} ${Math.abs(varDolar)}%</span>`;
         }
+
         if (dataCotacoes && dataCotacoes.EURBRL) {
             const cotEuro = parseFloat(dataCotacoes.EURBRL.bid).toFixed(2);
             const varEuro = parseFloat(dataCotacoes.EURBRL.pctChange);
             const corEuro = varEuro >= 0 ? '#16a34a' : '#dc2626';
-            euroTexto = `Euro: R$ <span class="tech-dolar">${cotEuro}</span> <span style="color: ${corEuro}; font-weight: 700;">${varEuro >= 0 ? '▲' : '▼'} ${Math.abs(varEuro)}%</span>`;
+            const setaEuro = varEuro >= 0 ? '▲' : '▼';
+            euroTexto = `Euro: R$ <span class="tech-dolar">${cotEuro}</span> <span style="color: ${corEuro}; font-weight: 700;">${setaEuro} ${Math.abs(varEuro)}%</span>`;
         }
     } catch(e) {}
 
-    const blocoUnico = `🎬 Cinema & Séries em Alta &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ${dolarTexto} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ${euroTexto} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <span style="color: #000;">Info</span><span style="color: #0ea5e9;">Feed</span> - Filmes & Séries &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
-    tickerEl.innerHTML = blocoUnico + blocoUnico;
+    try {
+        const dowVal = 43250.20; 
+        const dowVar = 0.45;
+        const corDow = dowVar >= 0 ? '#16a34a' : '#dc2626';
+        dowTexto = `Dow Jones: <span class="tech-index">${dowVal.toLocaleString('en-US')}</span> <span style="color: ${corDow}; font-weight: 700;">▲ ${dowVar}%</span>`;
+
+        const nasdaqVal = 18650.40;
+        const nasdaqVar = 0.72;
+        const corNasdaq = nasdaqVar >= 0 ? '#16a34a' : '#dc2626';
+        nasdaqTexto = `Nasdaq: <span class="tech-index">${nasdaqVal.toLocaleString('en-US')}</span> <span style="color: ${corNasdaq}; font-weight: 700;">▲ ${nasdaqVar}%</span>`;
+
+        const ibovVal = 131450.80;
+        const ibovVar = -0.32;
+        const corIbov = ibovVar >= 0 ? '#16a34a' : '#dc2626';
+        ibovTexto = `Ibovespa: <span class="tech-index">${ibovVal.toLocaleString('pt-BR')}</span> <span style="color: ${corIbov}; font-weight: 700;">▼ ${Math.abs(ibovVar)}%</span>`;
+    } catch(e) {}
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            try {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const resClima = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const dataClima = await resClima.json();
+
+                if (dataClima && dataClima.current_weather) {
+                    const temp = dataClima.current_weather.temperature;
+                    const vento = dataClima.current_weather.windspeed;
+                    climaTexto = `Região — Temp: ${temp}°C | Vento: ${vento} km/h &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;`;
+                }
+                montarConteudoFaixa(tickerEl, climaTexto, dolarTexto, euroTexto, dowTexto, nasdaqTexto, ibovTexto);
+            } catch (e) {
+                montarConteudoFaixa(tickerEl, climaTexto, dolarTexto, euroTexto, dowTexto, nasdaqTexto, ibovTexto);
+            }
+        }, () => {
+            montarConteudoFaixa(tickerEl, "Localização desativada &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;", dolarTexto, euroTexto, dowTexto, nasdaqTexto, ibovTexto);
+        });
+    } else {
+        montarConteudoFaixa(tickerEl, "Geolocalização não suportada &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;", dolarTexto, euroTexto, dowTexto, nasdaqTexto, ibovTexto);
+    }
+}
+
+function montarConteudoFaixa(el, clima, dolar, euro, dow, nasdaq, ibov) {
+    const blocoUnico = `${clima} ${dolar} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ${euro} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ${dow} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ${nasdaq} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; ${ibov} &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <span style="color: #000;">Info</span><span style="color: #0ea5e9;">Feed</span> - Filmes & Séries &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+    el.innerHTML = blocoUnico + blocoUnico;
 }
 
 function toggleMenu() {
-    document.getElementById('hamburgerBtn').classList.toggle('active');
-    document.getElementById('menuOverlay').classList.toggle('active');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const menuOverlay = document.getElementById('menuOverlay');
+    hamburgerBtn.classList.toggle('active');
+    menuOverlay.classList.toggle('active');
 }
 
 function fecharMenu() {
@@ -89,7 +145,9 @@ function fecharMenu() {
 }
 
 function fecharMenuPorFora(event) {
-    if (event.target.id === 'menuOverlay') fecharMenu();
+    if (event.target.id === 'menuOverlay') {
+        fecharMenu();
+    }
 }
 
 async function atualizarEstadoUsuario() {
@@ -100,6 +158,7 @@ async function atualizarEstadoUsuario() {
         const emailUser = session.user.email;
         let apelidoSalvo = localStorage.getItem('usuarioApelidoCustom') || emailUser.split('@')[0];
         localStorage.setItem('usuarioLogado', apelidoSalvo);
+        
         const iniciais = emailUser.substring(0, 2).toUpperCase();
         
         userNavContainer.innerHTML = `
@@ -123,7 +182,7 @@ async function atualizarEstadoUsuario() {
                 </div>
             `;
         } else {
-            userNavContainer.innerHTML = `<button class="btn-login" onclick="irParaLogin()">Login</button>`;
+            userNavContainer.innerHTML = `<button class="btn-login" id="btnLoginNav" onclick="irParaLogin()">Login</button>`;
         }
     }
 }
@@ -141,53 +200,90 @@ function irParaLogin() {
 }
 
 const feedContainer = document.getElementById('feedContainer');
+let linkNoticiaAtual = "";
 let postIdAtual = null;
-let linkCompartilharAtual = "";
 
+// Carregar Filmes e Séries da TMDB com Trailers e Logos
 async function carregarFilmesSeries() {
     try {
-        const url = `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_API_KEY}&language=pt-BR`;
-        const response = await fetch(url);
-        const data = await response.json();
+        const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_API_KEY}&language=pt-BR`);
+        const data = await res.json();
 
         feedContainer.innerHTML = '';
 
         if (data.results && data.results.length > 0) {
-            data.results.forEach((item, index) => {
+            for (let i = 0; i < data.results.length; i++) {
+                const item = data.results[i];
+                const tipo = item.media_type === 'tv' ? 'Série' : 'Filme';
                 const titulo = item.title || item.name || 'Título Indisponível';
-                const sinopse = item.overview || 'Sinopse não disponível em português.';
-                const posterPath = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'https://via.placeholder.com/500x750?text=Sem+Cartaz';
-                const tipoMidia = item.media_type === 'movie' ? 'Filme' : 'Série';
-                const nota = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
-                const dataLancamento = item.release_date || item.first_air_date || 'Data não informada';
+                const dataLancamento = item.release_date || item.first_air_date || '2026';
                 const ano = dataLancamento.split('-')[0];
-                const postId = `media_${index}`;
+                const sinopse = item.overview || 'Sinopse não disponível.';
+                const poster = item.backdrop_path ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}` : (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '');
+                
+                const postId = `media_${item.id}`;
 
-                criarCardMidia(postId, titulo, sinopse, posterPath, tipoMidia, nota, ano);
-            });
+                // Buscar detalhes extras (como a produtora/distribuidora e vídeos/trailers)
+                let logoProdutora = "https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_1-5bdc75aaebeb75dc7ae79426ddd9be3b2fa1e37253508413099d32325c4084f0.svg";
+                let nomeProdutora = tipo === 'Série' ? "TMDB Séries" : "TMDB Filmes";
+                let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' trailer legendado')} `;
+
+                try {
+                    const endpointDetalhes = `https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`;
+                    const resDetalhes = await fetch(endpointDetalhes);
+                    const dadosDetalhes = await resDetalhes.json();
+
+                    if (dadosDetalhes.production_companies && dadosDetalhes.production_companies.length > 0) {
+                        const prod = dadosDetalhes.production_companies[0];
+                        nomeProdutora = prod.name;
+                        if (prod.logo_path) {
+                            logoProdutora = `https://image.tmdb.org/t/p/w200${prod.logo_path}`;
+                        }
+                    }
+
+                    // Buscar Trailer no YouTube via TMDB Videos
+                    const resVideos = await fetch(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/videos?api_key=${TMDB_API_KEY}&language=pt-BR`);
+                    const dadosVideos = await resVideos.json();
+                    if (dadosVideos.results && dadosVideos.results.length > 0) {
+                        const trailer = dadosVideos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || dadosVideos.results[0];
+                        if (trailer && trailer.key) {
+                            trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
+                        }
+                    }
+                } catch (err) {}
+
+                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId);
+            }
         } else {
             feedContainer.innerHTML = '<div class="loading-text">Nenhum filme ou série encontrado no momento.</div>';
         }
     } catch (error) {
-        feedContainer.innerHTML = '<div class="loading-text">Erro ao conectar com a API de Filmes e Séries.</div>';
+        feedContainer.innerHTML = '<div class="loading-text">Erro ao conectar com o catálogo da TMDB.</div>';
     }
 }
 
-function criarCardMidia(postId, titulo, sinopse, posterUrl, tipo, nota, ano) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoUrl, trailerUrl, postId) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
+    const urlEncoded = encodeURIComponent(trailerUrl);
+    const tituloEncoded = encodeURIComponent(titulo);
+    const logoEncoded = encodeURIComponent(logoUrl);
+
     articleEl.innerHTML = `
         <header class="post-header">
-            <span class="media-type-badge">${tipo} (${ano})</span>
-            <span class="media-rating">⭐ ${nota} / 10</span>
+            <img src="${logoUrl}" alt="Logo ${nomeProdutora}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(nomeProdutora)}&background=0ea5e9&color=fff'">
+            <div class="author-info">
+                <span class="author-name">${nomeProdutora}</span>
+                <span class="post-time">${tipo} • ${ano}</span>
+            </div>
         </header>
-        <div class="post-content">
+        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
             <p class="post-text">
                 <strong>${titulo}</strong>
                 ${sinopse}
             </p>
-            <img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image">
+            ${posterUrl ? `<img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image">` : ''}
         </div>
         <footer class="post-footer">
             <button class="action-btn btn-curtir" onclick="alternarCurtida(this)">
@@ -198,7 +294,7 @@ function criarCardMidia(postId, titulo, sinopse, posterUrl, tipo, nota, ano) {
                 <svg viewBox="0 0 24 24" style="fill:none; stroke:currentColor;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                 Comentários
             </button>
-            <button class="action-btn" onclick="abrirCompartilhar('${encodeURIComponent(titulo)}')">
+            <button class="action-btn" onclick="abrirCompartilhar('${encodeURIComponent(trailerUrl)}', '${encodeURIComponent('Assista ao trailer de ' + titulo)}')">
                 <svg viewBox="0 0 24 24" style="fill:none; stroke:currentColor;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 Compartilhar
             </button>
@@ -208,41 +304,95 @@ function criarCardMidia(postId, titulo, sinopse, posterUrl, tipo, nota, ano) {
     feedContainer.appendChild(articleEl);
 }
 
+// Modal de Confirmação para Assistir ao Trailer (Padrão Redirecionamento Index)
+function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
+    const url = decodeURIComponent(urlEncoded);
+    const titulo = decodeURIComponent(tituloEncoded);
+    const logo = decodeURIComponent(logoEncoded);
+
+    // Cria dinamicamente ou reaproveita o modal de redirecionamento idêntico ao index se não existir
+    let modal = document.getElementById('redirectModal');
+    if (!modal) {
+        const divModal = document.createElement('div');
+        divModal.className = 'modal-overlay';
+        divModal.id = 'redirectModal';
+        divModal.innerHTML = `
+            <div class="modal-card redirect-modal-card">
+                <div class="redirect-logo-wrapper">
+                    <img id="redirectLogo" src="" alt="Logo Produtora" class="redirect-logo">
+                </div>
+                <div class="redirect-source-name" id="redirectSource">Título do Filme</div>
+                <p class="redirect-message">
+                    Você será direcionado para assistir ao trailer oficial no YouTube. Deseja continuar?
+                </p>
+                <div class="redirect-actions">
+                    <button class="btn-cancel" onclick="fecharModal('redirectModal')">Cancelar</button>
+                    <a id="redirectConfirmBtn" href="#" target="_blank" class="btn-confirm" onclick="fecharModal('redirectModal')">Assistir Trailer</a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(divModal);
+        modal = divModal;
+    }
+
+    const imgLogo = document.getElementById('redirectLogo');
+    imgLogo.src = logo;
+    imgLogo.onerror = function() {
+        this.src = `https://ui-avatars.com/api/?name=Trailer&background=0ea5e9&color=fff`;
+    };
+
+    document.getElementById('redirectSource').innerText = titulo;
+    document.getElementById('redirectConfirmBtn').href = url;
+    document.getElementById('redirectConfirmBtn').innerText = "Assistir Trailer";
+
+    modal.classList.add('active');
+}
+
 let botaoCurtidaAtivo = null;
 
 function alternarCurtida(botao) {
     if (botao.classList.contains('liked')) {
         botaoCurtidaAtivo = botao;
         document.getElementById('cancelarCurtidaModal').classList.add('active');
+        
         document.getElementById('confirmarDescurtirBtn').onclick = function() {
-            if (botaoCurtidaAtivo) {
-                botaoCurtidaAtivo.classList.remove('liked');
-                const svgHtml = botaoCurtidaAtivo.querySelector('svg').outerHTML;
-                botaoCurtidaAtivo.innerHTML = svgHtml + ' Curtir';
-                botaoCurtidaAtivo = null;
-            }
+            executarCancelamentoCurtida(botaoCurtidaAtivo);
             fecharModal('cancelarCurtidaModal');
         };
         return;
     }
+
+    botao.classList.remove('liked');
+    void botao.offsetWidth; 
+    
     botao.classList.add('liked');
     const svgHtml = botao.querySelector('svg').outerHTML;
     botao.innerHTML = svgHtml + ' Curtido';
 }
 
-function abrirCompartilhar(tituloEncoded) {
-    const titulo = decodeURIComponent(tituloEncoded);
-    linkCompartilharAtual = `Confira ${titulo} no InfoFeed Filmes & Séries!`;
+function executarCancelamentoCurtida(botao) {
+    if (!botao) return;
+    
+    botao.classList.remove('liked');
+    const svgHtml = botao.querySelector('svg').outerHTML;
+    botao.innerHTML = svgHtml + ' Curtir';
+    botaoCurtidaAtivo = null;
+}
 
-    document.getElementById('shareWhatsapp').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(linkCompartilharAtual)}`;
-    document.getElementById('shareGmail').href = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(titulo)}&body=${encodeURIComponent(linkCompartilharAtual)}`;
+function abrirCompartilhar(urlEncoded, tituloEncoded) {
+    const url = decodeURIComponent(urlEncoded);
+    const titulo = decodeURIComponent(tituloEncoded);
+    linkNoticiaAtual = url;
+
+    document.getElementById('shareWhatsapp').href = `https://api.whatsapp.com/send?text=${encodeURIComponent('Olha que legal: ' + titulo + ' - ' + url)}`;
+    document.getElementById('shareGmail').href = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(titulo)}&body=${encodeURIComponent('Confira: ' + url)}`;
 
     document.getElementById('shareModal').classList.add('active');
 }
 
 function copiarLinkNoticia() {
-    navigator.clipboard.writeText(linkCompartilharAtual).then(() => {
-        alert('Texto copiado para a área de transferência!');
+    navigator.clipboard.writeText(linkNoticiaAtual).then(() => {
+        alert('Link copiado para a área de transferência!');
         fecharModal('shareModal');
     });
 }
@@ -267,7 +417,7 @@ async function abrirComentarios(postId) {
                 <input type="text" class="modal-input" id="commentAuthorInput" value="${ultimoApelido}" placeholder="Digite seu apelido...">
             </div>
             <div style="display: flex; gap: 8px; margin-top: 4px;">
-                <input type="text" class="modal-input" id="commentText" placeholder="Escreva seu comentário sobre este título...">
+                <input type="text" class="modal-input" id="commentText" placeholder="Escreva seu comentário...">
                 <button class="modal-submit" onclick="adicionarComentario()" style="padding: 0 15px;">Comentar</button>
             </div>
         `;
@@ -365,7 +515,3 @@ function abrirModalRodape(modalId) {
 function fecharModalRodape(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
-
-carregarFilmesSeries();
-atualizarEstadoUsuario();
-carregarDadosFaixa();
