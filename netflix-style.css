@@ -541,3 +541,42 @@ body {
 .post-content {
     position: relative;
 }
+
+/* Garante que o container da imagem permita o posicionamento absoluto do botão */
+.post-content {
+    position: relative;
+}
+
+/* Botão discreto "Treiler" sobre a imagem */
+.trailer-discreto-btn {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.4s ease, transform 0.4s ease, background 0.3s ease;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+.trailer-discreto-btn.visivel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.trailer-discreto-btn:hover {
+    background: rgba(0, 0, 0, 0.75);
+    transform: scale(1.03);
+}

@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://edrmehdyusznzdltlhxz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6Iiwicm9sZSI6ImFub24iOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TMDB_API_KEY = '1792a76c814b3057e6b8b05d4eee27d5';
@@ -238,7 +238,10 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     const tituloEncoded = encodeURIComponent(titulo);
     const logoEncoded = encodeURIComponent(logoNetflix);
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
-    const uniqueBtnId = `loopBtnNetflix_${Math.random().toString(36).substring(2, 9)}`;
+    const uniqueCardId = `cardNetflix_${Math.random().toString(36).substring(2, 9)}`;
+    const uniqueBtnId = `btnTrailer_${Math.random().toString(36).substring(2, 9)}`;
+
+    articleEl.id = uniqueCardId;
 
     articleEl.innerHTML = `
         <header class="post-header">
@@ -259,8 +262,8 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
             ${posterUrl ? `
                 <div style="position: relative; width: 100%;">
                     <img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image" style="width: 100\%; display: block; cursor: pointer;" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
-                    <button id="${uniqueBtnId}" class="trailer-loop-btn" onclick="event.stopPropagation(); abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
-                        assista
+                    <button id="${uniqueBtnId}" class="trailer-discreto-btn" onclick="event.stopPropagation(); abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+                        Treiler
                     </button>
                 </div>
             ` : ''}
@@ -283,18 +286,8 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
 
     feedContainer.appendChild(articleEl);
 
-    const btnEl = document.getElementById(uniqueBtnId);
-    if (btnEl) {
-        let alternarTexto = false;
-        setInterval(() => {
-            alternarTexto = !alternarTexto;
-            btnEl.innerText = alternarTexto ? "trailer" : "assista";
-        }, 5000);
-    }
-}
-
-// Usa IntersectionObserver para disparar o temporizador de 2 segundos APENAS quando o card aparecer na tela
-    if (article.image) {
+    // Usa IntersectionObserver para disparar o temporizador de 2 segundos APENAS quando o card aparecer na tela
+    if (posterUrl) {
         const observerCard = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -303,14 +296,15 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
                         if (btnEl) {
                             btnEl.classList.add('visivel');
                         }
-                    }, 6000);
-                    observer.unobserve(entry.target); // Para de observar após ativar
+                    }, 2000);
+                    observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.2 }); // Ativa quando pelo menos 20% do card estiver visível
+        }, { threshold: 0.2 });
 
         observerCard.observe(articleEl);
     }
+}
 
 function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
     const url = decodeURIComponent(urlEncoded);
