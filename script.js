@@ -246,7 +246,10 @@ function criarCardNoticia(article, nomePortal, logoUrl, postId) {
     const urlEncoded = encodeURIComponent(article.url);
     const portalEncoded = encodeURIComponent(nomePortal);
     const logoEncoded = encodeURIComponent(logoUrl);
+    const uniqueCardId = `cardNoticia_${Math.random().toString(36).substring(2, 9)}`;
     const uniqueBtnId = `btnNoticia_${Math.random().toString(36).substring(2, 9)}`;
+
+    articleEl.id = uniqueCardId;
 
     articleEl.innerHTML = `
         <header class="post-header">
@@ -288,13 +291,23 @@ function criarCardNoticia(article, nomePortal, logoUrl, postId) {
 
     feedContainer.appendChild(articleEl);
 
+    // Usa IntersectionObserver para disparar o temporizador de 2 segundos APENAS quando o card aparecer na tela
     if (article.image) {
-        setTimeout(() => {
-            const btnEl = document.getElementById(uniqueBtnId);
-            if (btnEl) {
-                btnEl.classList.add('visivel');
-            }
-        }, 2000);
+        const observerCard = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        const btnEl = document.getElementById(uniqueBtnId);
+                        if (btnEl) {
+                            btnEl.classList.add('visivel');
+                        }
+                    }, 2000);
+                    observer.unobserve(entry.target); // Para de observar após ativar
+                }
+            });
+        }, { threshold: 0.2 }); // Ativa quando pelo menos 20% do card estiver visível
+
+        observerCard.observe(articleEl);
     }
 }
 
@@ -596,7 +609,7 @@ function criarBotaoFlutuanteMenu() {
             const maxX = window.innerWidth - floatBtn.offsetWidth;
             const maxY = window.innerHeight - floatBtn.offsetHeight;
 
-           newX = Math.max(10, Math.min(newX, maxX - 10));
+            newX = Math.max(10, Math.min(newX, maxX - 10));
             newY = Math.max(10, Math.min(newY, maxY - 10));
 
             floatBtn.style.left = `${newX}px`;
