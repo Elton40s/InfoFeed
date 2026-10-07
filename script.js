@@ -301,7 +301,7 @@ function criarCardNoticia(article, nomePortal, logoUrl, postId) {
                         if (btnEl) {
                             btnEl.classList.add('visivel');
                         }
-                    }, 4000);
+                    }, 6000);
                     observer.unobserve(entry.target); // Para de observar após ativar
                 }
             });
