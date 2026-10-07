@@ -600,3 +600,144 @@ function criarBotaoFlutuanteMenu() {
     floatBtn.addEventListener('mousedown', dragStart);
     floatBtn.addEventListener('touchstart', dragStart, { passive: true });
 }
+
+// =========================================================================
+// COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL COM ANIMAÇÃO DE X E PULSAR
+// =========================================================================
+window.addEventListener('DOMContentLoaded', () => {
+    criarBotaoFlutuanteMenu();
+});
+
+function criarBotaoFlutuanteMenu() {
+    if (document.getElementById('floatingMenuBtn')) return;
+
+    const floatBtn = document.createElement('button');
+    floatBtn.id = 'floatingMenuBtn';
+    floatBtn.className = 'floating-menu-btn';
+    // SVG estruturado com classes nas linhas para girar formando o X
+    floatBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6" class="float-icon-line line-1"></line>
+            <line x1="3" y1="12" x2="21" y2="12" class="float-icon-line line-2"></line>
+            <line x1="3" y1="18" x2="21" y2="18" class="float-icon-line line-3"></line>
+        </svg>
+    `;
+    floatBtn.setAttribute('title', 'Menu');
+    document.body.appendChild(floatBtn);
+
+    let pulseTimer = null;
+
+    // Controla aparecimento ao rolar a página para baixo e gerencia o timer de 5s para pulsar
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 150) {
+            floatBtn.classList.add('active-float');
+            
+            // Inicia o timer de 5 segundos se já não estiver rodando
+            if (!pulseTimer && !floatBtn.classList.contains('pulsing')) {
+                pulseTimer = setTimeout(() => {
+                    // Só pulsa se o menu estiver fechado
+                    if (!document.getElementById('menuOverlay').classList.contains('active')) {
+                        floatBtn.classList.add('pulsing');
+                    }
+                }, 5000);
+            }
+        } else {
+            floatBtn.classList.remove('active-float');
+            floatBtn.classList.remove('pulsing');
+            clearTimeout(pulseTimer);
+            pulseTimer = null;
+        }
+    });
+
+    // Monitora o estado do menu overlay para atualizar o botão flutuante para "X" ou remover a pulsação ao clicar
+    const observer = new MutationObserver(() => {
+        const menuAberto = document.getElementById('menuOverlay').classList.contains('active');
+        if (menuAberto) {
+            floatBtn.classList.add('is-open');
+            floatBtn.classList.remove('pulsing'); // Para de pulsar quando abre
+            clearTimeout(pulseTimer);
+            pulseTimer = null;
+        } else {
+            floatBtn.classList.remove('is-open');
+        }
+    });
+    observer.observe(document.getElementById('menuOverlay'), { attributes: true, attributeFilter: ['class'] });
+
+    // Ação ao clicar no botão flutuante
+    floatBtn.addEventListener('click', (e) => {
+        if (floatBtn.getAttribute('data-dragging') === 'true') return;
+        
+        // Remove o efeito de pulsar imediatamente ao interagir
+        floatBtn.classList.remove('pulsing');
+        clearTimeout(pulseTimer);
+        
+        toggleMenu();
+    });
+
+    // Lógica para arrastar o botão livremente pela tela
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+
+    const dragStart = (e) => {
+        isDragging = false;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        startX = clientX;
+        startY = clientY;
+        
+        const rect = floatBtn.getBoundingClientRect();
+        initialX = rect.left;
+        initialY = rect.top;
+
+        floatBtn.setAttribute('data-dragging', 'false');
+
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchmove', dragMove, { passive: false });
+        document.addEventListener('touchend', dragEnd);
+    };
+
+    const dragMove = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            isDragging = true;
+            floatBtn.setAttribute('data-dragging', 'true');
+        }
+
+        if (isDragging) {
+            e.preventDefault();
+            let newX = initialX + dx;
+            let newY = initialY + dy;
+
+            const maxX = window.innerWidth - floatBtn.offsetWidth;
+            const maxY = window.innerHeight - floatBtn.offsetHeight;
+
+            newX = Math.max(10, Math.min(newX, maxX - 10));
+            newY = Math.max(10, Math.min(newY, maxY - 10));
+
+            floatBtn.style.left = `${newX}px`;
+            floatBtn.style.top = `${newY}px`;
+            floatBtn.style.right = 'auto';
+        }
+    };
+
+    const dragEnd = () => {
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+        document.removeEventListener('touchmove', dragMove);
+        document.removeEventListener('touchend', dragEnd);
+        
+        setTimeout(() => {
+            floatBtn.setAttribute('data-dragging', 'false');
+        }, 50);
+    };
+
+    floatBtn.addEventListener('mousedown', dragStart);
+    floatBtn.addEventListener('touchstart', dragStart, { passive: true });
+}

@@ -895,3 +895,66 @@ body.dark-mode .weather-ticker-container {
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+
+/* BOTÃO FLUTUANTE DE MENU AO ROLAR A PÁGINA */
+.floating-menu-btn {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    background-color: #0ea5e9;
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s;
+    user-select: none;
+    touch-action: none;
+}
+
+.floating-menu-btn:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.floating-menu-btn.active-float {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Animação de pulsação opcional após 5 segundos */
+@keyframes pulseFloatBtn {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7); }
+    50% { transform: scale(1.12); box-shadow: 0 0 0 12px rgba(14, 165, 233, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+}
+
+.floating-menu-btn.pulsing {
+    animation: pulseFloatBtn 1.5s ease-in-out infinite;
+}
+
+/* Transformação dos traços para o ícone de X */
+.floating-menu-btn .float-icon-line {
+    transition: all 0.3s ease-in-out;
+    transform-origin: center;
+}
+
+.floating-menu-btn.is-open .line-1 {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.floating-menu-btn.is-open .line-2 {
+    opacity: 0;
+}
+
+.floating-menu-btn.is-open .line-3 {
+    transform: translateY(-6px) rotate(-45deg);
+}
