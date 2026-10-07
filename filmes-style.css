@@ -296,6 +296,7 @@ body {
 .author-name { font-size: 15px; font-weight: 600; }
 .post-time { font-size: 13px; color: var(--sub-text); }
 
+/* BOTÃO DE PLAY REALISTA NO LADO DIREITO COM PULSAÇÃO SUAVE A CADA 15 SEGUNDOS */
 .streaming-badge-container {
     margin-left: auto;
     display: flex;
@@ -304,16 +305,29 @@ body {
     transition: transform 0.2s ease;
 }
 
-.streaming-badge-container:hover { transform: scale(1.12); }
+.streaming-badge-container:hover { 
+    transform: scale(1.15); 
+}
 
-.streaming-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    object-fit: contain;
-    background-color: var(--border-color);
-    border: 1px solid var(--border-color);
-    padding: 3px;
+.netflix-play-btn-real {
+    width: 36px;
+    height: 36px;
+    fill: #E50914;
+    cursor: pointer;
+    animation: netflixPlaySoftPulse 15s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px rgba(229, 9, 20, 0.4));
+}
+
+@keyframes netflixPlaySoftPulse {
+    0%, 85%, 100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    90%, 95% {
+        transform: scale(1.15);
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.7));
+    }
 }
 
 .post-content { cursor: pointer; }
@@ -354,7 +368,6 @@ body {
 .action-btn:hover { background-color: var(--border-color); color: #0ea5e9; }
 .action-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-/* ANIMAÇÃO E ESTILO DO BOTÃO CURTIR */
 @keyframes pulseLike {
     0% { transform: scale(1); }
     50% { transform: scale(1.25); background-color: #0284c7; }
@@ -428,7 +441,6 @@ body {
 .modal-body-text { font-size: 14px; line-height: 1.6; color: #d1d5db; }
 .footer-contact-email { display: inline-block; margin-top: 8px; font-weight: 600; color: #0ea5e9; text-decoration: none; }
 
-/* BOTÃO FLUTUANTE DE MENU ARRASTÁVEL */
 .floating-menu-btn {
     position: fixed;
     top: 80px; right: 20px;
@@ -456,9 +468,6 @@ body {
 .floating-menu-btn.is-open .line-2 { opacity: 0; }
 .floating-menu-btn.is-open .line-3 { transform: translateY(-6px) rotate(-45deg); }
 
-/* ========================================================================= */
-/* AJUSTES EXCLUSIVOS PARA A VERSÃO DE PC (TELAS A PARTIR DE 1024px)         */
-/* ========================================================================= */
 @media (min-width: 1024px) {
     .hero-section {
         max-width: 950px;
@@ -500,32 +509,5 @@ body {
 
     .post-image {
         max-height: 480px;
-    }
-}
-
-/* BOTÃO DE PLAY REALISTA COM PULSAÇÃO SUAVE A CADA 15 SEGUNDOS */
-.netflix-play-btn-real {
-    width: 32px;
-    height: 32px;
-    fill: #E50914;
-    cursor: pointer;
-    animation: netflixPlaySoftPulse 15s ease-in-out infinite;
-    filter: drop-shadow(0 0 2px rgba(229, 9, 20, 0.3));
-}
-
-.netflix-play-btn-real:hover {
-    transform: scale(1.15);
-    filter: brightness(1.2);
-}
-
-@keyframes netflixPlaySoftPulse {
-    0%, 85%, 100% {
-        transform: scale(1);
-        opacity: 0.9;
-    }
-    90%, 95% {
-        transform: scale(1.15);
-        opacity: 1;
-        filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.7));
     }
 }

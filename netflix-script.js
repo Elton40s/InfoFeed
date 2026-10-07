@@ -205,35 +205,11 @@ async function carregarCatalogoNetflix() {
                 
                 const postId = `netflix_${item.id}`;
 
-                let nomeProdutora = "Netflix Originals";
-                let logoProdutora = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
-                let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' netflix trailer legendado')}`;
+                let nomeProdutora = "Netflix";
+                let logoNetflix = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
                 let streamingUrl = `https://www.netflix.com/search?q=${encodeURIComponent(titulo)}`;
 
-                try {
-                    const resDetalhes = await fetch(`https://api.themoviedb.org/3/movie/${item.id}?api_key=${TMDB_API_KEY}&language=pt-BR`);
-                    const dadosDetalhes = await resDetalhes.json();
-                    if (dadosDetalhes.production_companies && dadosDetalhes.production_companies.length > 0) {
-                        const prod = dadosDetalhes.production_companies[0];
-                        nomeProdutora = prod.name;
-                        if (prod.logo_path) {
-                            logoProdutora = `https://image.tmdb.org/t/p/w200${prod.logo_path}`;
-                        }
-                    }
-                } catch (e) {}
-
-                try {
-                    const resVideos = await fetch(`https://api.themoviedb.org/3/movie/${item.id}/videos?api_key=${TMDB_API_KEY}&language=pt-BR`);
-                    const dadosVideos = await resVideos.json();
-                    if (dadosVideos.results && dadosVideos.results.length > 0) {
-                        const trailer = dadosVideos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || dadosVideos.results[0];
-                        if (trailer && trailer.key) {
-                            trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
-                        }
-                    }
-                } catch (err) {}
-
-                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoProdutora, trailerUrl, postId, item.vote_average, streamingUrl);
+                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoNetflix, streamingUrl, postId, item.vote_average);
             }
         } else {
             feedContainer.innerHTML = '<div class="loading-text">Nenhum título encontrado para a Netflix no momento.</div>';
@@ -243,37 +219,27 @@ async function carregarCatalogoNetflix() {
     }
 }
 
-function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoProdutora, trailerUrl, postId, voteAverage, streamingUrl) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoNetflix, streamingUrl, postId, voteAverage) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
-    const urlEncoded = encodeURIComponent(trailerUrl);
+    const urlEncoded = encodeURIComponent(streamingUrl);
     const tituloEncoded = encodeURIComponent(titulo);
+    const logoEncoded = encodeURIComponent(logoNetflix);
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
-
-    let streamingHtml = '';
-    if (streamingUrl) {
-        const streamUrlEncoded = encodeURIComponent(streamingUrl);
-        const streamNomeEncoded = encodeURIComponent(`Assistir ${titulo} na Netflix`);
-        const streamLogoEncoded = encodeURIComponent('https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico');
-        
-        streamingHtml = `
-            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${streamUrlEncoded}', '${streamNomeEncoded}', '${streamLogoEncoded}')" title="Assistir na Netflix">
-                <svg class="netflix-play-btn-real" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
-        `;
-    }
 
     articleEl.innerHTML = `
         <header class="post-header">
-            <img src="${logoProdutora}" alt="Logo ${nomeProdutora}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(nomeProdutora)}&background=E50914&color=fff'">
+            <img src="${logoNetflix}" alt="Netflix" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=Netflix&background=E50914&color=fff'">
             <div class="author-info">
                 <span class="author-name">${nomeProdutora}</span>
                 <span class="post-time">${tipo} • ${ano}${notaFormatada}</span>
             </div>
-            ${streamingHtml}
+            <div class="streaming-badge-container" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${encodeURIComponent('Assistir ' + titulo + ' na Netflix')}','${logoEncoded}')" title="Assistir na Netflix">
+                <svg class="netflix-play-btn-real" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
         </header>
-        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${encodeURIComponent(logoProdutora)}')">
+        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
             <p class="post-text">
                 <strong>${titulo}</strong>
                 ${sinopse}
