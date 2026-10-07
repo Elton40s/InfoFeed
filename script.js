@@ -469,3 +469,112 @@ function abrirModalRodape(modalId) {
 function fecharModalRodape(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
+
+// =========================================================================
+// COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL AO ROLAR A PÁGINA
+// =========================================================================
+window.addEventListener('DOMContentLoaded', () => {
+    criarBotaoFlutuanteMenu();
+});
+
+function criarBotaoFlutuanteMenu() {
+    // Cria o elemento do botão flutuante se ele ainda não existir
+    if (document.getElementById('floatingMenuBtn')) return;
+
+    const floatBtn = document.createElement('button');
+    floatBtn.id = 'floatingMenuBtn';
+    floatBtn.className = 'floating-menu-btn';
+    floatBtn.innerHTML = `
+        <svg viewBox="0 0 24 24">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    `;
+    floatBtn.setAttribute('title', 'Menu');
+    document.body.appendChild(floatBtn);
+
+    // Controla aparecimento ao rolar a página para baixo
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 150) {
+            floatBtn.classList.add('active-float');
+        } else {
+            floatBtn.classList.remove('active-float');
+        }
+    });
+
+    // Ação ao clicar: abre o menu hambúrguer principal
+    floatBtn.addEventListener('click', (e) => {
+        // Evita abrir se o usuário estava apenas a arrastar o botão
+        if (floatBtn.getAttribute('data-dragging') === 'true') return;
+        toggleMenu();
+    });
+
+    // Lógica para permitir arrastar o botão para qualquer lugar da tela (Mouse e Touch)
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+
+    const dragStart = (e) => {
+        isDragging = false;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        startX = clientX;
+        startY = clientY;
+        
+        const rect = floatBtn.getBoundingClientRect();
+        initialX = rect.left;
+        initialY = rect.top;
+
+        floatBtn.setAttribute('data-dragging', 'false');
+
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchmove', dragMove, { passive: false });
+        document.addEventListener('touchend', dragEnd);
+    };
+
+    const dragMove = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            isDragging = true;
+            floatBtn.setAttribute('data-dragging', 'true');
+        }
+
+        if (isDragging) {
+            e.preventDefault();
+            let newX = initialX + dx;
+            let newY = initialY + dy;
+
+            // Limites da tela
+            const maxX = window.innerWidth - floatBtn.offsetWidth;
+            const maxY = window.innerHeight - floatBtn.offsetHeight;
+
+            newX = Math.max(10, Math.min(newX, maxX - 10));
+            newY = Math.max(10, Math.min(newY, maxY - 10));
+
+            floatBtn.style.left = `${newX}px`;
+            floatBtn.style.top = `${newY}px`;
+            floatBtn.style.right = 'auto'; // Remove o right fixo para liberar o posicionamento livre
+        }
+    };
+
+    const dragEnd = () => {
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+        document.removeEventListener('touchmove', dragMove);
+        document.removeEventListener('touchend', dragEnd);
+        
+        setTimeout(() => {
+            floatBtn.setAttribute('data-dragging', 'false');
+        }, 50);
+    };
+
+    floatBtn.addEventListener('mousedown', dragStart);
+    floatBtn.addEventListener('touchstart', dragStart, { passive: true });
+}
