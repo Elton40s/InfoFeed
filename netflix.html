@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfoFeed - Filmes & Séries</title>
+    <title>InfoFeed - Netflix Originals & Catálogo</title>
     
     <!-- Metatags para Pré-visualização no WhatsApp e Redes Sociais -->
-    <meta property="og:title" content="InfoFeed - Filmes & Séries">
-    <meta property="og:description" content="Descubra os filmes e séries que estão em alta no momento.">
+    <meta property="og:title" content="InfoFeed - Netflix">
+    <meta property="og:description" content="Descubra os filmes e séries em alta disponíveis na Netflix.">
     <meta property="og:image" content="favicon.svg">
     <meta property="og:type" content="website">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Favicon do InfoFeed -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <!-- Vinculando o arquivo CSS específico de filmes -->
+    <!-- Vinculando o arquivo CSS específico de filmes/streaming -->
     <link rel="stylesheet" href="filmes-style.css">
 </head>
 <body>
@@ -44,8 +44,8 @@
         <div class="menu-card-container">
             <ul class="menu-links">
                 <li><a href="index.html" onclick="fecharMenu()">INÍCIO / NOTÍCIAS</a></li>
-                <li><a href="filmes_series.html" onclick="fecharMenu()" style="color: #0ea5e9;">FILMES E SERIES</a></li>
-                <li><a href="netflix.html" onclick="fecharMenu()">NETFLIX</a></li>
+                <li><a href="filmes_series.html" onclick="fecharMenu()">FILMES E SERIES</a></li>
+                <li><a href="netflix.html" onclick="fecharMenu()" style="color: #0ea5e9;">NETFLIX</a></li>
                 <li><div class="menu-divider"></div></li>
                 <li><a href="#" id="modoNoturnoBtn" onclick="alternarModoNoturno(event)" style="color: #0ea5e9;">MODO NOTURNO</a></li>
             </ul>
@@ -57,8 +57,8 @@
         <div class="nav-logo logo-animada-principal" style="margin-bottom: 20px; font-size: 24px;">
             <span class="logo-info" style="color: var(--text-main);">Info</span><span class="logo-feed" style="color: #0ea5e9;">Feed</span>
         </div>
-        <h1 class="hero-title">Filmes e Séries</h1>
-        <p class="hero-subtitle">Descubra os títulos que estão fazendo sucesso, saiba tudo sobre o que esta em alta nos streamings e cinema!</p>
+        <h1 class="hero-title">Netflix em Alta</h1>
+        <p class="hero-subtitle">Explore o catálogo de filmes e séries disponíveis na Netflix, confira sinopses, trailers e comente com a galera!</p>
     </header>
 
     <!-- FAIXA DE METEOROLOGIA, DÓLAR, EURO, NASDAQ E ÍNDICES -->
@@ -69,7 +69,7 @@
     </div>
 
     <main class="feed-container" id="feedContainer">
-        <div class="loading-text">Carregando filmes e séries em alta... 🎬</div>
+        <div class="loading-text">Carregando conteúdos da Netflix... 🍿</div>
     </main>
 
     <!-- POP-UP CONFIRMAÇÃO DE SAÍDA -->
@@ -144,7 +144,7 @@
         </div>
     </div>
 
-    <!-- RODAPÉ DA PÁGINA (Idêntico ao da Página Principal) -->
+    <!-- RODAPÉ DA PÁGINA -->
     <footer class="site-footer">
         <div class="footer-links-container">
             <button class="footer-link-btn" onclick="abrirModalRodape('quemSomosModal')">Quem Somos</button>
@@ -167,7 +167,7 @@
                 <button class="modal-close" onclick="fecharModalRodape('quemSomosModal')">&times;</button>
             </div>
             <p class="modal-body-text">
-                O <strong>InfoFeed</strong> é um agregador inteligente de notícias criado para reunir em um único lugar as principais atualizações do seu dia a dia, mercado financeiro, esportes, clima e entretenimento de todo o mundo.
+                O <strong>InfoFeed</strong> é um agregador inteligente de notícias e entretenimento criado para reunir em um único lugar as principais atualizações do seu dia a dia.
             </p>
         </div>
     </div>
@@ -179,7 +179,7 @@
                 <button class="modal-close" onclick="fecharModalRodape('privacidadeModal')">&times;</button>
             </div>
             <p class="modal-body-text">
-                Valorizamos a sua privacidade. Os dados de login e interações salvos via Supabase servem estritamente para a sua identificação nos comentários. O site não se responsabiliza pelas notícias ou conteúdo disponibilizado na página, ficando total responsável seus respectivos canais de origem.
+                Valorizamos a sua privacidade. Os dados de login e interações salvos via Supabase servem estritamente para a sua identificação nos comentários.
             </p>
         </div>
     </div>
@@ -204,12 +204,12 @@
                 <button class="modal-close" onclick="fecharModalRodape('geraisModal')">&times;</button>
             </div>
             <p class="modal-body-text">
-                As cotações da bolsa e dados climáticos são obtidos de APIs públicas em tempo real, assim como os dados de filmes via TMDB. O InfoFeed atua apenas como um facilitador de leitura rápida. O site não se responsabiliza pelas mídias ou conteúdo disponibilizado na página, ficando total responsável seus respectivos canais.
+                Os dados de catálogo são obtidos através da API da TMDB em tempo real, filtrados especificamente para a Netflix.
             </p>
         </div>
     </div>
 
-    <!-- Vinculando o script específico de filmes -->
-    <script src="filmes-script.js"></script>
+    <!-- Vinculando o script dedicado da Netflix -->
+    <script src="netflix-script.js"></script>
 </body>
 </html>
