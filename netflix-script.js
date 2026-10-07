@@ -207,9 +207,20 @@ async function carregarCatalogoNetflix() {
 
                 let nomeProdutora = "Netflix";
                 let logoNetflix = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
-                let streamingUrl = `https://www.netflix.com/search?q=${encodeURIComponent(titulo)}`;
+                
+                let trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(titulo + ' netflix trailer legendado')}`;
+                try {
+                    const resVideos = await fetch(`https://api.themoviedb.org/3/movie/${item.id}/videos?api_key=${TMDB_API_KEY}&language=pt-BR`);
+                    const dadosVideos = await resVideos.json();
+                    if (dadosVideos.results && dadosVideos.results.length > 0) {
+                        const trailer = dadosVideos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || dadosVideos.results[0];
+                        if (trailer && trailer.key) {
+                            trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
+                        }
+                    }
+                } catch (err) {}
 
-                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoNetflix, streamingUrl, postId, item.vote_average);
+                criarCardMidia(item, titulo, ano, tipo, sinopse, poster, nomeProdutora, logoNetflix, trailerUrl, postId, item.vote_average);
             }
         } else {
             feedContainer.innerHTML = '<div class="loading-text">Nenhum título encontrado para a Netflix no momento.</div>';
@@ -219,14 +230,15 @@ async function carregarCatalogoNetflix() {
     }
 }
 
-function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoNetflix, streamingUrl, postId, voteAverage) {
+function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProdutora, logoNetflix, trailerUrl, postId, voteAverage) {
     const articleEl = document.createElement('article');
     articleEl.className = 'post-card';
 
-    const urlEncoded = encodeURIComponent(streamingUrl);
+    const urlEncoded = encodeURIComponent(trailerUrl);
     const tituloEncoded = encodeURIComponent(titulo);
     const logoEncoded = encodeURIComponent(logoNetflix);
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
+    const uniqueBtnId = `loopBtnNetflix_${Math.random().toString(36).substring(2, 9)}`;
 
     articleEl.innerHTML = `
         <header class="post-header">
@@ -239,12 +251,19 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
                 <svg class="netflix-play-btn-real" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             </div>
         </header>
-        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+        <div class="post-content">
             <p class="post-text">
                 <strong>${titulo}</strong>
                 ${sinopse}
             </p>
-            ${posterUrl ? `<img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image">` : ''}
+            ${posterUrl ? `
+                <div style="position: relative; width: 100%;">
+                    <img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image" style="width: 100\%; display: block; cursor: pointer;" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+                    <button id="${uniqueBtnId}" class="trailer-loop-btn" onclick="event.stopPropagation(); abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+                        assista
+                    </button>
+                </div>
+            ` : ''}
         </div>
         <footer class="post-footer">
             <button class="action-btn btn-curtir" onclick="alternarCurtida(this)">
@@ -263,6 +282,15 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     `;
 
     feedContainer.appendChild(articleEl);
+
+    const btnEl = document.getElementById(uniqueBtnId);
+    if (btnEl) {
+        let alternarTexto = false;
+        setInterval(() => {
+            alternarTexto = !alternarTexto;
+            btnEl.innerText = alternarTexto ? "trailer" : "assista";
+        }, 10000);
+    }
 }
 
 function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {

@@ -233,7 +233,6 @@ async function carregarFilmesSeries() {
                         }
                     }
 
-                    // Buscar Provedores de Streaming reais na TMDB (Watch Providers para o BR)
                     const resWatch = await fetch(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${TMDB_API_KEY}`);
                     const dadosWatch = await resWatch.json();
 
@@ -256,8 +255,6 @@ async function carregarFilmesSeries() {
                         }
                     }
 
-                    // SE A TMDB NÃO TIVER O STREAMING CADASTRADO:
-                    // Em vez de chutar uma logo aleatória, verificamos se há uma emissora/canal original (networks) ou usamos os dados da própria produtora oficial (ex: Marvel Studios, HBO, etc.)
                     if (!nomeStreaming || !logoStreaming) {
                         if (dadosDetalhes.networks && dadosDetalhes.networks.length > 0 && dadosDetalhes.networks[0].logo_path) {
                             nomeStreaming = dadosDetalhes.networks[0].name;
@@ -288,6 +285,7 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     const tituloEncoded = encodeURIComponent(titulo);
     const logoEncoded = encodeURIComponent(logoUrl);
     const notaFormatada = voteAverage ? ` ⭐ ${voteAverage.toFixed(1)}` : '';
+    const uniqueBtnId = `loopBtn_${Math.random().toString(36).substring(2, 9)}`;
 
     let streamingHtml = '';
     if (nomeStreaming && logoStreaming) {
@@ -311,12 +309,19 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
             </div>
             ${streamingHtml}
         </header>
-        <div class="post-content" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+        <div class="post-content">
             <p class="post-text">
                 <strong>${titulo}</strong>
                 ${sinopse}
             </p>
-            ${posterUrl ? `<img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image">` : ''}
+            ${posterUrl ? `
+                <div style="position: relative; width: 100%;">
+                    <img src="${posterUrl}" alt="Cartaz de ${titulo}" class="post-image" style="width: 100\%; display: block; cursor: pointer;" onclick="abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+                    <button id="${uniqueBtnId}" class="trailer-loop-btn" onclick="event.stopPropagation(); abrirConfirmacaoTrailer('${urlEncoded}', '${tituloEncoded}', '${logoEncoded}')">
+                        assista
+                    </button>
+                </div>
+            ` : ''}
         </div>
         <footer class="post-footer">
             <button class="action-btn btn-curtir" onclick="alternarCurtida(this)">
@@ -335,6 +340,15 @@ function criarCardMidia(item, titulo, ano, tipo, sinopse, posterUrl, nomeProduto
     `;
 
     feedContainer.appendChild(articleEl);
+
+    const btnEl = document.getElementById(uniqueBtnId);
+    if (btnEl) {
+        let alternarTexto = false;
+        setInterval(() => {
+            alternarTexto = !alternarTexto;
+            btnEl.innerText = alternarTexto ? "trailer" : "assista";
+        }, 10000);
+    }
 }
 
 function abrirConfirmacaoTrailer(urlEncoded, tituloEncoded, logoEncoded) {
@@ -547,9 +561,6 @@ function fecharModalRodape(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
-// =========================================================================
-// COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL COM ANIMAÇÃO DE X E PULSAR
-// =========================================================================
 function criarBotaoFlutuanteMenu() {
     if (document.getElementById('floatingMenuBtn')) return;
 
