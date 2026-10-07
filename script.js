@@ -246,6 +246,7 @@ function criarCardNoticia(article, nomePortal, logoUrl, postId) {
     const urlEncoded = encodeURIComponent(article.url);
     const portalEncoded = encodeURIComponent(nomePortal);
     const logoEncoded = encodeURIComponent(logoUrl);
+    const uniqueBtnId = `btnNoticia_${Math.random().toString(36).substring(2, 9)}`;
 
     articleEl.innerHTML = `
         <header class="post-header">
@@ -260,7 +261,14 @@ function criarCardNoticia(article, nomePortal, logoUrl, postId) {
                 <strong>${article.title}</strong>
                 ${article.description || ''}
             </p>
-            ${article.image ? `<img src="${article.image}" alt="Imagem da notícia" class="post-image">` : ''}
+            ${article.image ? `
+                <div style="position: relative; width: 100%;">
+                    <img src="${article.image}" alt="Imagem da notícia" class="post-image" style="width: 100%; display: block;">
+                    <button id="${uniqueBtnId}" class="noticia-completa-btn" onclick="event.stopPropagation(); abrirConfirmacaoRedirecionamento('${urlEncoded}', '${portalEncoded}', '${logoEncoded}')">
+                        Noticia completa
+                    </button>
+                </div>
+            ` : ''}
         </div>
         <footer class="post-footer">
             <button class="action-btn btn-curtir" onclick="alternarCurtida(this)">
@@ -279,6 +287,15 @@ function criarCardNoticia(article, nomePortal, logoUrl, postId) {
     `;
 
     feedContainer.appendChild(articleEl);
+
+    if (article.image) {
+        setTimeout(() => {
+            const btnEl = document.getElementById(uniqueBtnId);
+            if (btnEl) {
+                btnEl.classList.add('visivel');
+            }
+        }, 2000);
+    }
 }
 
 function abrirConfirmacaoRedirecionamento(urlEncoded, fonteEncoded, logoEncoded) {
@@ -313,7 +330,7 @@ function alternarCurtida(botao) {
     }
 
     botao.classList.remove('liked');
-    void botao.offsetWidth; // Reinicia a animação CSS do like
+    void botao.offsetWidth; 
     
     botao.classList.add('liked');
     const svgHtml = botao.querySelector('svg').outerHTML;
@@ -471,115 +488,6 @@ function fecharModalRodape(modalId) {
 }
 
 // =========================================================================
-// COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL AO ROLAR A PÁGINA
-// =========================================================================
-window.addEventListener('DOMContentLoaded', () => {
-    criarBotaoFlutuanteMenu();
-});
-
-function criarBotaoFlutuanteMenu() {
-    // Cria o elemento do botão flutuante se ele ainda não existir
-    if (document.getElementById('floatingMenuBtn')) return;
-
-    const floatBtn = document.createElement('button');
-    floatBtn.id = 'floatingMenuBtn';
-    floatBtn.className = 'floating-menu-btn';
-    floatBtn.innerHTML = `
-        <svg viewBox="0 0 24 24">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-    `;
-    floatBtn.setAttribute('title', 'Menu');
-    document.body.appendChild(floatBtn);
-
-    // Controla aparecimento ao rolar a página para baixo
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 150) {
-            floatBtn.classList.add('active-float');
-        } else {
-            floatBtn.classList.remove('active-float');
-        }
-    });
-
-    // Ação ao clicar: abre o menu hambúrguer principal
-    floatBtn.addEventListener('click', (e) => {
-        // Evita abrir se o usuário estava apenas a arrastar o botão
-        if (floatBtn.getAttribute('data-dragging') === 'true') return;
-        toggleMenu();
-    });
-
-    // Lógica para permitir arrastar o botão para qualquer lugar da tela (Mouse e Touch)
-    let isDragging = false;
-    let startX, startY, initialX, initialY;
-
-    const dragStart = (e) => {
-        isDragging = false;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        startX = clientX;
-        startY = clientY;
-        
-        const rect = floatBtn.getBoundingClientRect();
-        initialX = rect.left;
-        initialY = rect.top;
-
-        floatBtn.setAttribute('data-dragging', 'false');
-
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-        document.addEventListener('touchmove', dragMove, { passive: false });
-        document.addEventListener('touchend', dragEnd);
-    };
-
-    const dragMove = (e) => {
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-            isDragging = true;
-            floatBtn.setAttribute('data-dragging', 'true');
-        }
-
-        if (isDragging) {
-            e.preventDefault();
-            let newX = initialX + dx;
-            let newY = initialY + dy;
-
-            // Limites da tela
-            const maxX = window.innerWidth - floatBtn.offsetWidth;
-            const maxY = window.innerHeight - floatBtn.offsetHeight;
-
-            newX = Math.max(10, Math.min(newX, maxX - 10));
-            newY = Math.max(10, Math.min(newY, maxY - 10));
-
-            floatBtn.style.left = `${newX}px`;
-            floatBtn.style.top = `${newY}px`;
-            floatBtn.style.right = 'auto'; // Remove o right fixo para liberar o posicionamento livre
-        }
-    };
-
-    const dragEnd = () => {
-        document.removeEventListener('mousemove', dragMove);
-        document.removeEventListener('mouseup', dragEnd);
-        document.removeEventListener('touchmove', dragMove);
-        document.removeEventListener('touchend', dragEnd);
-        
-        setTimeout(() => {
-            floatBtn.setAttribute('data-dragging', 'false');
-        }, 50);
-    };
-
-    floatBtn.addEventListener('mousedown', dragStart);
-    floatBtn.addEventListener('touchstart', dragStart, { passive: true });
-}
-
-// =========================================================================
 // COMPORTAMENTO DO MENU FLUTUANTE ARRASTÁVEL COM ANIMAÇÃO DE X E PULSAR
 // =========================================================================
 window.addEventListener('DOMContentLoaded', () => {
@@ -592,7 +500,6 @@ function criarBotaoFlutuanteMenu() {
     const floatBtn = document.createElement('button');
     floatBtn.id = 'floatingMenuBtn';
     floatBtn.className = 'floating-menu-btn';
-    // SVG estruturado com classes nas linhas para girar formando o X
     floatBtn.innerHTML = `
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6" class="float-icon-line line-1"></line>
@@ -605,15 +512,12 @@ function criarBotaoFlutuanteMenu() {
 
     let pulseTimer = null;
 
-    // Controla aparecimento ao rolar a página para baixo e gerencia o timer de 5s para pulsar
     window.addEventListener('scroll', () => {
         if (window.scrollY > 150) {
             floatBtn.classList.add('active-float');
             
-            // Inicia o timer de 5 segundos se já não estiver rodando
             if (!pulseTimer && !floatBtn.classList.contains('pulsing')) {
                 pulseTimer = setTimeout(() => {
-                    // Só pulsa se o menu estiver fechado
                     if (!document.getElementById('menuOverlay').classList.contains('active')) {
                         floatBtn.classList.add('pulsing');
                     }
@@ -627,12 +531,11 @@ function criarBotaoFlutuanteMenu() {
         }
     });
 
-    // Monitora o estado do menu overlay para atualizar o botão flutuante para "X" ou remover a pulsação ao clicar
     const observer = new MutationObserver(() => {
         const menuAberto = document.getElementById('menuOverlay').classList.contains('active');
         if (menuAberto) {
             floatBtn.classList.add('is-open');
-            floatBtn.classList.remove('pulsing'); // Para de pulsar quando abre
+            floatBtn.classList.remove('pulsing');
             clearTimeout(pulseTimer);
             pulseTimer = null;
         } else {
@@ -641,18 +544,15 @@ function criarBotaoFlutuanteMenu() {
     });
     observer.observe(document.getElementById('menuOverlay'), { attributes: true, attributeFilter: ['class'] });
 
-    // Ação ao clicar no botão flutuante
     floatBtn.addEventListener('click', (e) => {
         if (floatBtn.getAttribute('data-dragging') === 'true') return;
         
-        // Remove o efeito de pulsar imediatamente ao interagir
         floatBtn.classList.remove('pulsing');
         clearTimeout(pulseTimer);
         
         toggleMenu();
     });
 
-    // Lógica para arrastar o botão livremente pela tela
     let isDragging = false;
     let startX, startY, initialX, initialY;
 
@@ -696,7 +596,7 @@ function criarBotaoFlutuanteMenu() {
             const maxX = window.innerWidth - floatBtn.offsetWidth;
             const maxY = window.innerHeight - floatBtn.offsetHeight;
 
-            newX = Math.max(10, Math.min(newX, maxX - 10));
+           newX = Math.max(10, Math.min(newX, maxX - 10));
             newY = Math.max(10, Math.min(newY, maxY - 10));
 
             floatBtn.style.left = `${newX}px`;
