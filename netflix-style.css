@@ -296,6 +296,7 @@ body {
 .author-name { font-size: 15px; font-weight: 600; }
 .post-time { font-size: 13px; color: var(--sub-text); }
 
+/* BOTÃO DE PLAY REALISTA NO LADO DIREITO COM PULSAÇÃO SUAVE A CADA 15 SEGUNDOS */
 .streaming-badge-container {
     margin-left: auto;
     display: flex;
@@ -304,13 +305,29 @@ body {
     transition: transform 0.2s ease;
 }
 
-.streaming-badge-container:hover { transform: scale(1.08); }
+.streaming-badge-container:hover { 
+    transform: scale(1.15); 
+}
 
-.streaming-avatar {
-    max-height: 36px;
-    max-width: 110px;
-    object-fit: contain;
-    display: block;
+.netflix-play-btn-real {
+    width: 36px;
+    height: 36px;
+    fill: #E50914;
+    cursor: pointer;
+    animation: netflixPlaySoftPulse 15s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px rgba(229, 9, 20, 0.4));
+}
+
+@keyframes netflixPlaySoftPulse {
+    0%, 85%, 100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    90%, 95% {
+        transform: scale(1.15);
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.7));
+    }
 }
 
 .post-content { cursor: pointer; }
