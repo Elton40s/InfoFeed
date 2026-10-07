@@ -205,7 +205,7 @@ async function carregarCatalogoNetflix() {
                 
                 const postId = `netflix_${item.id}`;
 
-                let nomeProdutora = "Netflix";
+                let nomeProdutora = "Netflix Originals";
                 let logoNetflix = "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico";
                 let streamingUrl = `https://www.netflix.com/search?q=${encodeURIComponent(titulo)}`;
 
