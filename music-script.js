@@ -47,7 +47,8 @@ async function carregarMusicasDaAPI() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = '<div class="loading-text">Conectando à Jamendo... 🎵</div>';
 
-    const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total&include=musicinfo`;
+    // Adicionado include=artist_image para puxar a foto real do autor do Jamendo
+    const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total&include=artist_image`;
 
     try {
         const resposta = await fetch(urlAPI);
@@ -65,12 +66,11 @@ async function carregarMusicasDaAPI() {
     }
 }
 
-// Nova função para Lançamentos (ordenado por data de lançamento / mais recente)
 async function carregarLancamentos() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = '<div class="loading-text">Buscando últimos lançamentos... 🚀</div>';
 
-    const urlLancamentos = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=releasedate_desc&include=musicinfo`;
+    const urlLancamentos = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=releasedate_desc&include=artist_image`;
 
     try {
         const resposta = await fetch(urlLancamentos);
@@ -107,7 +107,7 @@ async function buscarPorTagAPI(tag) {
     if (!subContainer) return;
     subContainer.innerHTML = '<div class="loading-text">Buscando estilo na API...</div>';
 
-    const urlTag = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16&include=musicinfo`;
+    const urlTag = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16&include=artist_image`;
 
     try {
         const resposta = await fetch(urlTag);
@@ -186,17 +186,15 @@ function criarCardElemento(track, index) {
     
     const imagemCapa = track.album_image || track.image || 'https://ui-avatars.com/api/?name=Music&background=10b981&color=fff';
     
-    // Extrai o ano da data de lançamento
     let anoMusica = "2026";
     if (track.releasedate) {
         anoMusica = track.releasedate.split('-')[0];
     }
 
-    // Formata o número de vezes ouvida (popularity ou listens se disponível)
     const totalOuvidas = track.stats && track.stats.rate_listen_total ? Number(track.stats.rate_listen_total).toLocaleString('pt-BR') : Math.floor(Math.random() * 5000 + 300);
 
-    // Foto redonda do artista no lado oposto (fallback para avatar gerado se não houver foto)
-    const fotoArtista = track.artist_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(track.artist_name)}&background=10b981&color=fff`;
+    // Usa prioritariamente a imagem real do artista enviada pela Jamendo. Se não houver, usa o avatar como último recurso.
+    const fotoArtista = track.artist_image || track.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(track.artist_name)}&background=10b981&color=fff`;
 
     card.innerHTML = `
         <div class="music-card-img-wrapper">
