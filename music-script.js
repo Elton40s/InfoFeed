@@ -158,7 +158,7 @@ async function carregarRadios() {
                                 <span class="music-card-artist">Rádio Online Jamendo</span>
                             </div>
                             <div class="jamendo-logo-container" onclick="irParaSiteJamendo(event)" title="Visitar site do Jamendo">
-                                <img src="https://img.icons8.com/color/96/jamendo.png" alt="Jamendo Logo" class="jamendo-round-logo">
+                                <img src="image-519134.png" alt="Jamendo Logo" class="jamendo-logo-quadrada">
                                 <span class="jamendo-logo-label">Jamendo</span>
                             </div>
                         </div>
@@ -218,7 +218,7 @@ function criarCardElemento(track, index) {
                     <span class="music-card-artist">${track.artist_name}</span>
                 </div>
                 <div class="jamendo-logo-container" onclick="irParaSiteJamendo(event)" title="Visitar site oficial do Jamendo">
-                    <img src="https://img.icons8.com/color/96/jamendo.png" alt="Jamendo Logo" class="jamendo-round-logo">
+                    <img src="image-519134.png" alt="Jamendo Logo" class="jamendo-logo-quadrada">
                     <span class="jamendo-logo-label">Jamendo</span>
                 </div>
             </div>
@@ -232,7 +232,7 @@ function criarCardElemento(track, index) {
     return card;
 }
 
-// Função que exibe pop-up de confirmação antes de redirecionar para o site do Jamendo
+// Pop-up de confirmação antes de redirecionar para a página oficial do Jamendo
 function irParaSiteJamendo(event) {
     event.stopPropagation();
     const confirmar = confirm("Deseja ir para a página oficial do Jamendo?");
