@@ -43,6 +43,26 @@ function alternarModoNoturno(event) {
     fecharMenu();
 }
 
+// Simulação de verificação de login (você pode integrar com o Supabase ou localStorage do seu site)
+function usuarioEstaLogado() {
+    // Altere para a sua lógica real de login, ex: localStorage.getItem('usuarioLogado')
+    return localStorage.getItem('usuarioLogado') === 'true';
+}
+
+function verificarLoginOuBloquear() {
+    if (!usuarioEstaLogado()) {
+        const modal = document.getElementById('loginGlassModal');
+        if (modal) modal.classList.remove('oculto');
+        return false;
+    }
+    return true;
+}
+
+function fecharModalLogin() {
+    const modal = document.getElementById('loginGlassModal');
+    if (modal) modal.classList.add('oculto');
+}
+
 async function carregarMusicasDaAPI() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = '<div class="loading-text">Conectando à Jamendo... 🎵</div>';
@@ -232,7 +252,6 @@ function criarCardElemento(track, index) {
     return card;
 }
 
-// Pop-up de confirmação antes de redirecionar para a página oficial do Jamendo
 function irParaSiteJamendo(event) {
     event.stopPropagation();
     const confirmar = confirm("Deseja ir para a página oficial do Jamendo?");
@@ -242,6 +261,8 @@ function irParaSiteJamendo(event) {
 }
 
 function selecionarEIniciarMusica(index) {
+    if (!verificarLoginOuBloquear()) return;
+
     indiceMusicaAtual = index;
     const track = listaMusicasAtual[index];
     const audioEl = document.getElementById('audioElement');
@@ -259,6 +280,8 @@ function selecionarEIniciarMusica(index) {
 }
 
 function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
+    if (!verificarLoginOuBloquear()) return;
+
     const audioEl = document.getElementById('audioElement');
     audioEl.src = streamUrl;
     audioEl.play().catch(err => console.log("Erro de reprodução rádio:", err));
@@ -283,6 +306,8 @@ function fecharPlayerTotalmente(event) {
 }
 
 function alternarPlayPause() {
+    if (!verificarLoginOuBloquear()) return;
+
     const audioEl = document.getElementById('audioElement');
     const btn = document.getElementById('playPauseBtn');
 
@@ -571,7 +596,7 @@ function criarBotaoFlutuanteMenu() {
         document.addEventListener('mouseup', onMouseUp);
     });
 
-    floatBtn.addEventListener('touchstart', (e) => { 
+    floatBtn.addEventListener('touchstart', (e) => {
         if(e.touches.length === 1) {
             dragStart(e.touches[0].clientX, e.touches[0].clientY);
             const onTouchMove = (ev) => dragMove(ev.touches[0].clientX, ev.touches[0].clientY, ev);

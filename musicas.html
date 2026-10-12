@@ -62,6 +62,17 @@
         <div class="loading-text">Carregando ritmos da Jamendo... 🎵</div>
     </main>
 
+    <!-- POP-UP TRANSLÚCIDO ESTILO VIDRO PARA LOGIN OBRIGATÓRIO -->
+    <div class="login-glass-overlay oculto" id="loginGlassModal">
+        <div class="login-glass-card">
+            <button class="glass-close-btn" onclick="fecharModalLogin()">✕</button>
+            <div class="glass-icon">🔒</div>
+            <h2 class="glass-title">Acesso Restrito</h2>
+            <p class="glass-desc">Para ouvir as músicas e aproveitar todo o conteúdo do site InfoFeed, faça o login em sua conta.</p>
+            <button class="glass-login-btn" onclick="irParaLogin()">Fazer Login Agora</button>
+        </div>
+    </div>
+
     <!-- PLAYER POP-UP FLUTUANTE -->
     <div class="music-player-bar oculto" id="musicPlayerBar">
         <div class="player-header-bar">
@@ -94,7 +105,7 @@
                 <span>🔊</span>
                 <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.8" oninput="ajustarVolume(this.value)" class="volume-slider">
             </div>
-        </div> 
+        </div>
 
         <audio id="audioElement" onended="tocarProximaMusica()" ontimeupdate="atualizarProgressoAudio()"></audio>
     </div>
