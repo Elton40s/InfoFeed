@@ -1,15 +1,37 @@
-// Usando a sua Identificação do Cliente oficial da Jamendo
 const JAMENDO_CLIENT_ID = 'f61f517b'; 
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
+// Verifica o modo noturno salvo
+if (localStorage.getItem('modoNoturno') === 'ativo') {
+    document.body.classList.add('dark-mode');
+    const btnNoturno = document.getElementById('modoNoturnoBtn');
+    if(btnNoturno) btnNoturno.innerText = 'MODO CLARO';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     carregarMusicasDaAPI();
+    criarBotaoFlutuanteMenu();
 });
+
+function alternarModoNoturno(event) {
+    event.preventDefault();
+    document.body.classList.toggle('dark-mode');
+    const btn = document.getElementById('modoNoturnoBtn');
+    
+    if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('modoNoturno', 'ativo');
+        if(btn) btn.innerText = 'MODO CLARO';
+    } else {
+        localStorage.setItem('modoNoturno', 'inativo');
+        if(btn) btn.innerText = 'MODO NOTURNO';
+    }
+    fecharMenu();
+}
 
 async function carregarMusicasDaAPI() {
     const container = document.getElementById('musicFeedContainer');
-    container.innerHTML = '<div class="loading-text">Conectando à Jamendo com sua aplicação... 🎵</div>';
+    container.innerHTML = '<div class="loading-text">Conectando à Jamendo... 🎵</div>';
 
     const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total`;
 
@@ -232,4 +254,129 @@ function fecharMenuPorFora(event) {
 
 function irParaLogin() {
     window.location.href = 'login.html';
+}
+
+// BOTÃO FLUTUANTE ARRASTÁVEL COM COR VERDE FEEDMUSIC
+function criarBotaoFlutuanteMenu() {
+    if (document.getElementById('floatingMenuBtn')) return;
+
+    const floatBtn = document.createElement('button');
+    floatBtn.id = 'floatingMenuBtn';
+    floatBtn.className = 'floating-menu-btn';
+    floatBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6" class="float-icon-line line-1"></line>
+            <line x1="3" y1="12" x2="21" y2="12" class="float-icon-line line-2"></line>
+            <line x1="3" y1="18" x2="21" y2="18" class="float-icon-line line-3"></line>
+        </svg>
+    `;
+    floatBtn.setAttribute('title', 'Menu');
+    document.body.appendChild(floatBtn);
+
+    let pulseTimer = null;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 150) {
+            floatBtn.classList.add('active-float');
+            
+            if (!pulseTimer && !floatBtn.classList.contains('pulsing')) {
+                pulseTimer = setTimeout(() => {
+                    if (!document.getElementById('menuOverlay').classList.contains('active')) {
+                        floatBtn.classList.add('pulsing');
+                    }
+                }, 5000);
+            }
+        } else {
+            floatBtn.classList.remove('active-float');
+            floatBtn.classList.remove('pulsing');
+            clearTimeout(pulseTimer);
+            pulseTimer = null;
+        }
+    });
+
+    const observer = new MutationObserver(() => {
+        const menuAberto = document.getElementById('menuOverlay').classList.contains('active');
+        if (menuAberto) {
+            floatBtn.classList.add('is-open');
+            floatBtn.classList.remove('pulsing');
+            clearTimeout(pulseTimer);
+            pulseTimer = null;
+        } else {
+            floatBtn.classList.remove('is-open');
+        }
+    });
+    observer.observe(document.getElementById('menuOverlay'), { attributes: true, attributeFilter: ['class'] });
+
+    floatBtn.addEventListener('click', (e) => {
+        if (floatBtn.getAttribute('data-dragging') === 'true') return;
+        floatBtn.classList.remove('pulsing');
+        clearTimeout(pulseTimer);
+        toggleMenu();
+    });
+
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+
+    const dragStart = (e) => {
+        isDragging = false;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        startX = clientX;
+        startY = clientY;
+        
+        const rect = floatBtn.getBoundingClientRect();
+        initialX = rect.left;
+        initialY = rect.top;
+
+        floatBtn.setAttribute('data-dragging', 'false');
+
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchmove', dragMove, { passive: false });
+        document.addEventListener('touchend', dragEnd);
+    };
+
+    const dragMove = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            isDragging = true;
+            floatBtn.setAttribute('data-dragging', 'true');
+        }
+
+        if (isDragging) {
+            e.preventDefault();
+            let newX = initialX + dx;
+            let newY = initialY + dy;
+
+            const maxX = window.innerWidth - floatBtn.offsetWidth;
+            const maxY = window.innerHeight - floatBtn.offsetHeight;
+
+            newX = Math.max(10, Math.min(newX, maxX - 10));
+            newY = Math.max(10, Math.min(newY, maxY - 10));
+
+            floatBtn.style.left = `${newX}px`;
+            floatBtn.style.top = `${newY}px`;
+            floatBtn.style.right = 'auto';
+        }
+    };
+
+    const dragEnd = () => {
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+        document.removeEventListener('touchmove', dragMove);
+        document.removeEventListener('touchend', dragEnd);
+        
+        setTimeout(() => {
+            floatBtn.setAttribute('data-dragging', 'false');
+        }, 50);
+    };
+
+    floatBtn.addEventListener('mousedown', dragStart);
+    floatBtn.addEventListener('touchstart', dragStart, { passive: true });
 }

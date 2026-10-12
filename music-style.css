@@ -1,4 +1,3 @@
-/* Estilos específicos para a seção e player de Música */
 .music-tabs-container {
     display: flex;
     gap: 12px;
@@ -26,7 +25,6 @@
     border-color: #10b981;
 }
 
-/* Grid de Cards de Música */
 .music-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -115,23 +113,21 @@
     color: var(--sub-text);
 }
 
-/* PLAYER FLUTUANTE NO RODAPÉ (Pop-up Bar) */
+/* PLAYER FLUTUANTE NO RODAPÉ */
 .music-player-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(18, 18, 18, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(16, 185, 129, 0.3);
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
     padding: 12px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     z-index: 2500;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-    color: #ffffff;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    color: var(--text-main);
 }
 
 .player-track-info {
@@ -158,7 +154,7 @@
 .player-title {
     font-size: 14px;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -166,7 +162,7 @@
 
 .player-artist {
     font-size: 12px;
-    color: #9ca3af;
+    color: var(--sub-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -181,7 +177,7 @@
 .player-ctrl-btn {
     background: none;
     border: none;
-    color: #ffffff;
+    color: var(--text-main);
     font-size: 18px;
     cursor: pointer;
     transition: transform 0.1s;
@@ -220,6 +216,59 @@
     accent-color: #10b981;
     cursor: pointer;
 }
+
+/* BOTÃO FLUTUANTE VERDE IGUAL AO DAS OUTRAS PÁGINAS */
+.floating-menu-btn {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    background-color: #10b981;
+    color: #ffffff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s;
+    user-select: none;
+    touch-action: none;
+}
+
+.floating-menu-btn:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.floating-menu-btn.active-float {
+    opacity: 1;
+    visibility: visible;
+}
+
+@keyframes pulseFloatGreenBtn {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    50% { transform: scale(1.12); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.floating-menu-btn.pulsing {
+    animation: pulseFloatGreenBtn 1.5s ease-in-out infinite;
+}
+
+.floating-menu-btn .float-icon-line {
+    transition: all 0.3s ease-in-out;
+    transform-origin: center;
+}
+
+.floating-menu-btn.is-open .line-1 { transform: translateY(6px) rotate(45deg); }
+.floating-menu-btn.is-open .line-2 { opacity: 0; }
+.floating-menu-btn.is-open .line-3 { transform: translateY(-6px) rotate(-45deg); }
 
 @media (max-width: 768px) {
     .music-player-bar {

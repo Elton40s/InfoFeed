@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark-mode">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +13,8 @@
 
     <!-- BARRA SUPERIOR -->
     <nav class="top-nav" id="navBar">
-        <a href="index.html" class="nav-logo" style="text-decoration: none;">
-            <span class="logo-info" style="color: #fff;">Info</span><span class="logo-feed" style="color: #10b981;">Music</span>
+        <a href="index.html" class="nav-logo" id="navLogoEl" style="text-decoration: none;">
+            <span class="logo-info" style="color: var(--text-main);">Feed</span><span class="logo-feed" style="color: #10b981;">Music</span>
         </a>
         <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Abrir Menu">
             <span></span>
@@ -42,23 +42,23 @@
 
     <!-- CABEÇALHO DA PÁGINA DE MÚSICA -->
     <header class="hero-section">
-        <h1 class="hero-title" style="color: #10b981;">FeedMusic & Jamendo</h1>
+        <h1 class="hero-title" style="color: var(--text-main);">Feed<span style="color: #10b981;">Music</span></h1>
         <p class="hero-subtitle">Explore milhões de faixas, estilos, artistas independentes e rádios online.</p>
     </header>
 
-    <!-- ABAS DE NAVEGAÇÃO DE MÚSICA (Estilos, Artistas, Rádios) -->
+    <!-- ABAS DE NAVEGAÇÃO DE MÚSICA -->
     <div class="music-tabs-container">
         <button class="music-tab-btn active" onclick="mudarAbaMusica('trending', this)">Populares</button>
         <button class="music-tab-btn" onclick="mudarAbaMusica('genres', this)">Estilos</button>
         <button class="music-tab-btn" onclick="mudarAbaMusica('radios', this)">Rádios</button>
     </div>
 
-    <!-- CONTAINER PRINCIPAL DO CATÁLOGO DE MÚSICA -->
+    <!-- CONTAINER PRINCIPAL -->
     <main class="feed-container" id="musicFeedContainer">
         <div class="loading-text">Carregando ritmos da Jamendo... 🎵</div>
     </main>
 
-    <!-- POP-UP / MINI-PLAYER FLUTUANTE FIXO NO RODAPÉ -->
+    <!-- PLAYER FLUTUANTE FIXO NO RODAPÉ -->
     <div class="music-player-bar" id="musicPlayerBar">
         <div class="player-track-info">
             <img id="playerCover" src="https://ui-avatars.com/api/?name=Music&background=10b981&color=fff" alt="Capa" class="player-cover">
@@ -79,7 +79,6 @@
             <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.8" oninput="ajustarVolume(this.value)" class="volume-slider">
         </div>
 
-        <!-- Elemento de Áudio HTML5 Oculto -->
         <audio id="audioElement" onended="tocarProximaMusica()"></audio>
     </div>
 
