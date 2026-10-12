@@ -1,4 +1,4 @@
-const JAMENDO_CLIENT_ID = '593557e5'; // ID público de testes da Jamendo API
+const JAMENDO_CLIENT_ID = '56d30c95'; // Client ID padrão da comunidade para testes de desenvolvimento
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
@@ -11,7 +11,7 @@ async function carregarMusicasTrending() {
     container.innerHTML = '<div class="loading-text">Buscando sucessos na Jamendo... 🎵</div>';
 
     try {
-        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&include=musicinfo&audioformat=mp32`);
+        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=20&order=popularity_total`);
         const data = await res.json();
 
         if (data && data.results && data.results.length > 0) {
@@ -47,14 +47,16 @@ async function buscarPorTag(tag) {
     subContainer.innerHTML = '<div class="loading-text">Carregando estilo...</div>';
 
     try {
-        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16&audioformat=mp32`);
+        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16`);
         const data = await res.json();
-        if (data && data.results) {
+        if (data && data.results && data.results.length > 0) {
             listaMusicasAtual = data.results;
             subContainer.innerHTML = '';
             data.results.forEach((track, index) => {
                 subContainer.appendChild(criarCardElemento(track, index));
             });
+        } else {
+            subContainer.innerHTML = '<div class="loading-text">Nenhuma música para este estilo.</div>';
         }
     } catch (e) {
         subContainer.innerHTML = '<div class="loading-text">Erro ao carregar estilo.</div>';
@@ -69,12 +71,12 @@ async function carregarRadios() {
         const res = await fetch(`https://api.jamendo.com/v3.0/radios/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=12`);
         const data = await res.json();
 
-        if (data && data.results) {
+        if (data && data.results && data.results.length > 0) {
             container.innerHTML = '';
             const grid = document.createElement('div');
             grid.className = 'music-grid';
 
-            data.results.forEach((radio, index) => {
+            data.results.forEach((radio) => {
                 const card = document.createElement('div');
                 card.className = 'music-card';
                 card.innerHTML = `
@@ -92,6 +94,8 @@ async function carregarRadios() {
                 grid.appendChild(card);
             });
             container.appendChild(grid);
+        } else {
+            container.innerHTML = '<div class="loading-text">Nenhuma rádio disponível no momento.</div>';
         }
     } catch (e) {
         container.innerHTML = '<div class="loading-text">Erro ao carregar rádios.</div>';
@@ -138,7 +142,7 @@ function selecionarEIniciarMusica(index) {
     const audioEl = document.getElementById('audioElement');
     
     audioEl.src = track.audio;
-    audioEl.play();
+    audioEl.play().catch(err => console.log("Erro ao reproduzir áudio:", err));
 
     document.getElementById('playerTitle').innerText = track.name;
     document.getElementById('playerArtist').innerText = track.artist_name;
@@ -149,7 +153,7 @@ function selecionarEIniciarMusica(index) {
 function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
     const audioEl = document.getElementById('audioElement');
     audioEl.src = streamUrl;
-    audioEl.play();
+    audioEl.play().catch(err => console.log("Erro ao reproduzir rádio:", err));
 
     document.getElementById('playerTitle').innerText = nomeRadio;
     document.getElementById('playerArtist').innerText = 'Rádio Jamendo';
