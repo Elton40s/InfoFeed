@@ -26,6 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarMusicasDaAPI();
     criarBotaoFlutuanteMenu();
     configurarArrastePlayer();
+    configurarCliqueForaPlayer();
 });
 
 function alternarModoNoturno(event) {
@@ -192,6 +193,10 @@ function selecionarEIniciarMusica(index) {
     document.getElementById('playerArtist').innerText = track.artist_name;
     document.getElementById('playerCover').src = track.album_image || track.image || 'https://ui-avatars.com/api/?name=Music&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
+
+    // Exibe o player quando uma música é selecionada
+    const playerBar = document.getElementById('musicPlayerBar');
+    playerBar.classList.remove('oculto');
 }
 
 function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
@@ -203,6 +208,19 @@ function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
     document.getElementById('playerArtist').innerText = 'Rádio Ao Vivo';
     document.getElementById('playerCover').src = imagemRadio || 'https://ui-avatars.com/api/?name=Radio&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
+
+    const playerBar = document.getElementById('musicPlayerBar');
+    playerBar.classList.remove('oculto');
+}
+
+function fecharPlayerTotalmente(event) {
+    event.stopPropagation();
+    const audioEl = document.getElementById('audioElement');
+    audioEl.pause();
+    audioEl.src = '';
+    
+    const playerBar = document.getElementById('musicPlayerBar');
+    playerBar.classList.add('oculto');
 }
 
 function alternarPlayPause() {
@@ -248,18 +266,19 @@ function mudarAbaMusica(tipo, btnEl) {
     if (tipo === 'radios') carregarRadios();
 }
 
+// Configuração completa de arraste para Mouse e Dispositivos Touch (Celular/Tablet)
 function configurarArrastePlayer() {
     const playerBar = document.getElementById('musicPlayerBar');
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
 
-    playerBar.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button') || e.target.closest('input')) {
-            return;
+    const startDrag = (clientX, clientY, target) => {
+        if (target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.closest('button') || target.closest('input')) {
+            return false;
         }
         isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        startX = clientX;
+        startY = clientY;
 
         const rect = playerBar.getBoundingClientRect();
         initialLeft = rect.left;
@@ -269,15 +288,13 @@ function configurarArrastePlayer() {
         playerBar.style.right = 'auto';
         playerBar.style.left = `${initialLeft}px`;
         playerBar.style.top = `${initialTop}px`;
+        return true;
+    };
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    });
-
-    function onMouseMove(e) {
+    const moveDrag = (clientX, clientY) => {
         if (!isDragging) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
 
         let newLeft = initialLeft + dx;
         let newTop = initialTop + dy;
@@ -290,16 +307,84 @@ function configurarArrastePlayer() {
 
         playerBar.style.left = `${newLeft}px`;
         playerBar.style.top = `${newTop}px`;
-    }
+    };
 
+    // Eventos Mouse
+    playerBar.addEventListener('mousedown', (e) => {
+        if (startDrag(e.clientX, e.clientY, e.target)) {
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+    });
+    function onMouseMove(e) { moveDrag(e.clientX, e.clientY); }
     function onMouseUp() {
         isDragging = false;
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
     }
+
+    // Eventos Touch (Celular e Tablet)
+    playerBar.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            if (startDrag(touch.clientX, touch.clientY, e.target)) {
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            }
+        }
+    }, { passive: true });
+
+    function onTouchMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveDrag(touch.clientX, touch.clientY);
+    }
+    function onTouchEnd() {
+        isDragging = false;
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+    }
 }
 
-function alternarModoCompacto() {
+// Minimiza se clicar fora, e expande se clicar na caixa minimizada
+function configurarCliqueForaPlayer() {
+    const playerBar = document.getElementById('musicPlayerBar');
+
+    document.addEventListener('click', (e) => {
+        if (playerBar.classList.contains('oculto')) return;
+
+        const clicouNoPlayer = playerBar.contains(e.target);
+
+        if (!clicouNoPlayer) {
+            // Clicou fora: se estiver expandido, minimiza para melhor navegação
+            if (!playerBar.classList.contains('compacto')) {
+                playerBar.classList.add('compacto');
+                const btnMin = document.getElementById('minimizePlayerBtn');
+                if(btnMin) {
+                    btnMin.innerText = '+';
+                    btnMin.title = 'Expandir Player';
+                }
+            }
+        } else {
+            // Clicou dentro da caixa: se estiver compacto, expande de volta
+            if (playerBar.classList.contains('compacto')) {
+                // Evita expandir se clicou especificamente no botão de minimizar/fechar
+                if (!e.target.classList.contains('player-minimize-btn')) {
+                    playerBar.classList.remove('compacto');
+                    const btnMin = document.getElementById('minimizePlayerBtn');
+                    if(btnMin) {
+                        btnMin.innerText = '−';
+                        btnMin.title = 'Minimizar / Compactar';
+                    }
+                }
+            }
+        }
+    });
+}
+
+function alternarModoCompacto(event) {
+    event.stopPropagation();
     const playerBar = document.getElementById('musicPlayerBar');
     const btnMin = document.getElementById('minimizePlayerBtn');
     
@@ -424,11 +509,8 @@ function criarBotaoFlutuanteMenu() {
     let isDragging = false;
     let startX, startY, initialX, initialY;
 
-    const dragStart = (e) => {
+    const dragStart = (clientX, clientY) => {
         isDragging = false;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
         startX = clientX;
         startY = clientY;
         
@@ -437,17 +519,9 @@ function criarBotaoFlutuanteMenu() {
         initialY = rect.top;
 
         floatBtn.setAttribute('data-dragging', 'false');
-
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-        document.addEventListener('touchmove', dragMove, { passive: false });
-        document.addEventListener('touchend', dragEnd);
     };
 
-    const dragMove = (e) => {
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
+    const dragMove = (clientX, clientY, e) => {
         const dx = clientX - startX;
         const dy = clientY - startY;
 
@@ -457,7 +531,7 @@ function criarBotaoFlutuanteMenu() {
         }
 
         if (isDragging) {
-            e.preventDefault();
+            if(e) e.preventDefault();
             let newX = initialX + dx;
             let newY = initialY + dy;
 
@@ -474,16 +548,34 @@ function criarBotaoFlutuanteMenu() {
     };
 
     const dragEnd = () => {
-        document.removeEventListener('mousemove', dragMove);
-        document.removeEventListener('mouseup', dragEnd);
-        document.removeEventListener('touchmove', dragMove);
-        document.removeEventListener('touchend', dragEnd);
-        
         setTimeout(() => {
             floatBtn.setAttribute('data-dragging', 'false');
         }, 50);
     };
 
-    floatBtn.addEventListener('mousedown', dragStart);
-    floatBtn.addEventListener('touchstart', dragStart, { passive: true });
+    floatBtn.addEventListener('mousedown', (e) => {
+        dragStart(e.clientX, e.clientY);
+        const onMouseMove = (ev) => dragMove(ev.clientX, ev.clientY, ev);
+        const onMouseUp = () => {
+            dragEnd();
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    floatBtn.addEventListener('touchstart', (e) => {
+        if(e.touches.length === 1) {
+            dragStart(e.touches[0].clientX, e.touches[0].clientY);
+            const onTouchMove = (ev) => dragMove(ev.touches[0].clientX, ev.touches[0].clientY, ev);
+            const onTouchEnd = () => {
+                dragEnd();
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            };
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+        }
+    }, { passive: true });
 }

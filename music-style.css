@@ -130,7 +130,7 @@
     bottom: 20px;
     right: 20px;
     width: 380px;
-    background-color: rgba(30, 30, 30, 0.75);
+    background-color: rgba(30, 30, 30, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(16, 185, 129, 0.4);
@@ -144,7 +144,12 @@
     color: #ffffff;
     cursor: grab;
     user-select: none;
-    transition: width 0.3s ease, padding 0.3s ease;
+    touch-action: none;
+    transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+}
+
+.music-player-bar.oculto {
+    display: none !important;
 }
 
 .music-player-bar:active {
@@ -294,8 +299,8 @@
 
 /* ESTADO COMPACTO */
 .music-player-bar.compacto {
-    width: 240px;
-    padding: 10px;
+    width: 230px;
+    padding: 8px;
 }
 
 .music-player-bar.compacto .player-header-bar span {
@@ -309,14 +314,14 @@
 }
 
 .music-player-bar.compacto .player-cover {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
 }
 
 .music-player-bar.compacto .play-main-btn {
-    width: 34px;
-    height: 34px;
-    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
 }
 
 /* BOTÃO FLUTUANTE VERDE */

@@ -61,11 +61,14 @@
         <div class="loading-text">Carregando ritmos da Jamendo... 🎵</div>
     </main>
 
-    <!-- PLAYER POP-UP FLUTUANTE TRANSLÚCIDO E ARRASTÁVEL -->
-    <div class="music-player-bar" id="musicPlayerBar">
+    <!-- PLAYER POP-UP FLUTUANTE OCULTO INICIALMENTE -->
+    <div class="music-player-bar oculto" id="musicPlayerBar">
         <div class="player-header-bar">
             <span>🎵 FeedMusic Player</span>
-            <button class="player-minimize-btn" id="minimizePlayerBtn" onclick="alternarModoCompacto()" title="Minimizar / Expandir">−</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="player-minimize-btn" id="minimizePlayerBtn" onclick="alternarModoCompacto(event)" title="Minimizar / Expandir">−</button>
+                <button class="player-minimize-btn" onclick="fecharPlayerTotalmente(event)" title="Fechar Player">✕</button>
+            </div>
         </div>
         
         <div class="player-main-content">
