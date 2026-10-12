@@ -1,5 +1,5 @@
-// Usando a estrutura padrão da API oficial da Jamendo: v3.0/tracks
-const JAMENDO_CLIENT_ID = '709fa152'; // Client ID oficial público de testes da documentação da Jamendo
+// Usando a sua Identificação do Cliente oficial da Jamendo
+const JAMENDO_CLIENT_ID = 'f61f517b'; 
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
@@ -9,9 +9,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function carregarMusicasDaAPI() {
     const container = document.getElementById('musicFeedContainer');
-    container.innerHTML = '<div class="loading-text">Conectando à Jamendo API... 🎵</div>';
+    container.innerHTML = '<div class="loading-text">Conectando à Jamendo com sua aplicação... 🎵</div>';
 
-    // Montando a URL oficial da API: https://api.jamendo.com/v3.0/tracks/?client_id=...&format=json
     const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total`;
 
     try {
@@ -74,7 +73,6 @@ async function carregarRadios() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = '<div class="loading-text">Carregando rádios da Jamendo...</div>';
 
-    // Rota oficial de rádios: v3.0/radios
     const urlRadios = `https://api.jamendo.com/v3.0/radios/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=12`;
 
     try {
