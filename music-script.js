@@ -571,7 +571,7 @@ function criarBotaoFlutuanteMenu() {
         document.addEventListener('mouseup', onMouseUp);
     });
 
-    floatBtn.addEventListener('touchstart', (e) => {
+    floatBtn.addEventListener('touchstart', (e) => { 
         if(e.touches.length === 1) {
             dragStart(e.touches[0].clientX, e.touches[0].clientY);
             const onTouchMove = (ev) => dragMove(ev.touches[0].clientX, ev.touches[0].clientY, ev);

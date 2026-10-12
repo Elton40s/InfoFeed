@@ -402,7 +402,7 @@
 
 .floating-menu-btn .float-icon-line {
     transition: all 0.3s ease-in-out;
-    transform-origin: center;
+    transform-origin: center; 
 }
 
 .floating-menu-btn.is-open .line-1 { transform: translateY(6px) rotate(45deg); }
