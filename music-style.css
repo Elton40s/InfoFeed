@@ -124,7 +124,7 @@
     color: var(--sub-text);
 }
 
-/* PLAYER POP-UP FLUTUANTE TRANSLÚCIDO E ARRASTÁVEL */
+/* PLAYER POP-UP FLUTUANTE TRANSLÚCIDO E ARRASTÁVEL (NORMAL POR PADRÃO) */
 .music-player-bar {
     position: fixed;
     bottom: 20px;
@@ -297,10 +297,10 @@
     height: 4px;
 }
 
-/* ESTADO COMPACTO */
+/* ESTADO COMPACTO (SÓ ATIVADO QUANDO CLICADO NO BOTÃO DE MINIMIZAR OU FORA) */
 .music-player-bar.compacto {
-    width: 230px;
-    padding: 8px;
+    width: 230px !important;
+    padding: 8px !important;
 }
 
 .music-player-bar.compacto .player-header-bar span {
