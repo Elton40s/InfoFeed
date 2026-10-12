@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark-mode">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +11,9 @@
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
+    <!-- BARRA SUPERIOR COM LOGO ANIMADA -->
     <nav class="top-nav" id="navBar">
-        <a href="index.html" class="nav-logo" id="navLogoEl" style="text-decoration: none;">
+        <a href="index.html" class="nav-logo logo-animada-principal" id="navLogoEl" style="text-decoration: none;">
             <span class="logo-info" style="color: var(--text-main);">Feed</span><span class="logo-feed" style="color: #10b981;">Music</span>
         </a>
         <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Abrir Menu">
@@ -35,16 +35,26 @@
                 <li><a href="netflix.html" onclick="fecharMenu()" style="color: #E50914;">NETFLIX</a></li>
                 <li><a href="musicas.html" onclick="fecharMenu()" style="color: #10b981;">FEEDMUSIC</a></li>
                 <li><div class="menu-divider"></div></li>
-                <li><a href="#" id="modoNoturnoBtn" onclick="alternarModoNoturno(event)" style="color: #0ea5e9;">MODO NOTURNO</a></li>
+                <li><a href="#" id="modoNoturnoBtn" onclick="alternarModoNoturno(event)" style="color: #0ea5e9;">MODO CLARO</a></li>
             </ul>
         </div>
     </div>
 
-    <!-- CABEÇALHO DA PÁGINA DE MÚSICA -->
+    <!-- CABEÇALHO PRINCIPAL COM LOGO ANIMADA -->
     <header class="hero-section">
-        <h1 class="hero-title" style="color: var(--text-main);">Feed<span style="color: #10b981;">Music</span></h1>
+        <div class="nav-logo logo-animada-principal" style="margin-bottom: 20px; font-size: 36px;">
+            <span class="logo-info" style="color: var(--text-main);">Feed</span><span class="logo-feed" style="color: #10b981;">Music</span>
+        </div>
+        <h1 class="hero-title">Sua trilha sonora em um feed.</h1>
         <p class="hero-subtitle">Explore milhões de faixas, estilos, artistas independentes e rádios online.</p>
     </header>
+
+    <!-- FAIXA DE RÁDIOS E DESTAQUES (Mais escura) -->
+    <div class="weather-ticker-container music-ticker-dark">
+        <div class="weather-ticker-track" id="musicTickerText">
+            Jamendo API &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; Milhões de Músicas Livres &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; Rádios Online &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; FeedMusic 🎵 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+    </div>
 
     <!-- ABAS DE NAVEGAÇÃO DE MÚSICA -->
     <div class="music-tabs-container">
