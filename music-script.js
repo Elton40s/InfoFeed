@@ -194,7 +194,7 @@ function selecionarEIniciarMusica(index) {
     document.getElementById('playerCover').src = track.album_image || track.image || 'https://ui-avatars.com/api/?name=Music&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
 
-    // Exibe o player e garante que ele abre no tamanho normal (não compacto)
+    // Força a remoção de oculto E de compacto para abrir expandido em tamanho normal
     const playerBar = document.getElementById('musicPlayerBar');
     playerBar.classList.remove('oculto');
     playerBar.classList.remove('compacto');
@@ -216,7 +216,7 @@ function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
     document.getElementById('playerCover').src = imagemRadio || 'https://ui-avatars.com/api/?name=Radio&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
 
-    // Exibe o player e garante que ele abre no tamanho normal (não compacto)
+    // Força a remoção de oculto E de compacto para abrir expandido em tamanho normal
     const playerBar = document.getElementById('musicPlayerBar');
     playerBar.classList.remove('oculto');
     playerBar.classList.remove('compacto');
