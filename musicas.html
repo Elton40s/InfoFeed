@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoFeed - FeedMusic</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="music-style.css">
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <nav class="top-nav" id="navBar">
+        <a href="index.html" class="nav-logo" style="text-decoration: none;">
+            <span class="logo-info" style="color: #fff;">Info</span><span class="logo-feed" style="color: #10b981;">Music</span>
+        </a>
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Abrir Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div id="userNavContainer" class="user-nav-container">
+            <button class="btn-login" id="btnLoginNav" onclick="irParaLogin()">Login</button>
+        </div>
+    </nav>
+
+    <!-- MENU CARD FLUTUANTE -->
+    <div class="menu-overlay" id="menuOverlay" onclick="fecharMenuPorFora(event)">
+        <div class="menu-card-container">
+            <ul class="menu-links">
+                <li><a href="index.html" onclick="fecharMenu()">INICIO / NOTICIAS</a></li>
+                <li><a href="filmes_series.html" onclick="fecharMenu()">FILMES E SERIES</a></li>
+                <li><a href="netflix.html" onclick="fecharMenu()" style="color: #E50914;">NETFLIX</a></li>
+                <li><a href="musicas.html" onclick="fecharMenu()" style="color: #10b981;">FEEDMUSIC</a></li>
+                <li><div class="menu-divider"></div></li>
+                <li><a href="#" id="modoNoturnoBtn" onclick="alternarModoNoturno(event)" style="color: #0ea5e9;">MODO NOTURNO</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CABEÇALHO DA PÁGINA DE MÚSICA -->
+    <header class="hero-section">
+        <h1 class="hero-title" style="color: #10b981;">FeedMusic & Jamendo</h1>
+        <p class="hero-subtitle">Explore milhões de faixas, estilos, artistas independentes e rádios online.</p>
+    </header>
+
+    <!-- ABAS DE NAVEGAÇÃO DE MÚSICA (Estilos, Artistas, Rádios) -->
+    <div class="music-tabs-container">
+        <button class="music-tab-btn active" onclick="mudarAbaMusica('trending', this)">Populares</button>
+        <button class="music-tab-btn" onclick="mudarAbaMusica('genres', this)">Estilos</button>
+        <button class="music-tab-btn" onclick="mudarAbaMusica('radios', this)">Rádios</button>
+    </div>
+
+    <!-- CONTAINER PRINCIPAL DO CATÁLOGO DE MÚSICA -->
+    <main class="feed-container" id="musicFeedContainer">
+        <div class="loading-text">Carregando ritmos da Jamendo... 🎵</div>
+    </main>
+
+    <!-- POP-UP / MINI-PLAYER FLUTUANTE FIXO NO RODAPÉ -->
+    <div class="music-player-bar" id="musicPlayerBar">
+        <div class="player-track-info">
+            <img id="playerCover" src="https://ui-avatars.com/api/?name=Music&background=10b981&color=fff" alt="Capa" class="player-cover">
+            <div class="player-meta">
+                <span id="playerTitle" class="player-title">Selecione uma música</span>
+                <span id="playerArtist" class="player-artist">FeedMusic</span>
+            </div>
+        </div>
+        
+        <div class="player-controls">
+            <button class="player-ctrl-btn" onclick="tocarMusicaAnterior()" title="Anterior">⏮</button>
+            <button class="player-ctrl-btn play-main-btn" id="playPauseBtn" onclick="alternarPlayPause()" title="Play/Pause">▶</button>
+            <button class="player-ctrl-btn" onclick="tocarProximaMusica()" title="Próxima">⏭</button>
+        </div>
+
+        <div class="player-volume-wrapper">
+            <span style="font-size: 12px; color: var(--sub-text);">🔊</span>
+            <input type="range" id="volumeRange" min="0" max="1" step="0.05" value="0.8" oninput="ajustarVolume(this.value)" class="volume-slider">
+        </div>
+
+        <!-- Elemento de Áudio HTML5 Oculto -->
+        <audio id="audioElement" onended="tocarProximaMusica()"></audio>
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer class="site-footer">
+        <p class="footer-copy">&copy; 2026 InfoFeed - FeedMusic & Jamendo API.</p>
+    </footer>
+
+    <script src="music-script.js"></script>
+</body>
+</html>
