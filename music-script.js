@@ -2,7 +2,7 @@ const JAMENDO_CLIENT_ID = 'f61f517b';
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
-// Define o modo noturno como padrão se o usuário nunca escolheu antes
+// Define o modo noturno como padrão na primeira abertura
 if (!localStorage.getItem('modoNoturno')) {
     localStorage.setItem('modoNoturno', 'ativo');
 }
@@ -18,12 +18,12 @@ if (localStorage.getItem('modoNoturno') === 'ativo') {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Animação imediata na logo principal ao carregar a página
+    // Animação da logo superior configurada para disparar após 10 segundos (10000 ms)
     setTimeout(() => {
         document.querySelectorAll('.logo-animada-principal').forEach(el => {
             el.classList.add('animate-logo');
         });
-    }, 400);
+    }, 10000);
 
     carregarMusicasDaAPI();
     criarBotaoFlutuanteMenu();
