@@ -49,9 +49,10 @@
         <p class="hero-subtitle">Explore milhões de faixas, estilos, artistas independentes e rádios online.</p>
     </header>
 
-    <!-- ABAS DE NAVEGAÇÃO DE MÚSICA -->
+    <!-- ABAS DE NAVEGAÇÃO DE MÚSICA (Com Lançamentos adicionada) -->
     <div class="music-tabs-container">
         <button class="music-tab-btn active" onclick="mudarAbaMusica('trending', this)">Populares</button>
+        <button class="music-tab-btn" onclick="mudarAbaMusica('releases', this)">Lançamentos</button>
         <button class="music-tab-btn" onclick="mudarAbaMusica('genres', this)">Estilos</button>
         <button class="music-tab-btn" onclick="mudarAbaMusica('radios', this)">Rádios</button>
     </div>
@@ -61,7 +62,7 @@
         <div class="loading-text">Carregando ritmos da Jamendo... 🎵</div>
     </main>
 
-    <!-- PLAYER POP-UP FLUTUANTE (Sempre tamanho normal) -->
+    <!-- PLAYER POP-UP FLUTUANTE -->
     <div class="music-player-bar oculto" id="musicPlayerBar">
         <div class="player-header-bar">
             <span>🎵 FeedMusic Player</span>
