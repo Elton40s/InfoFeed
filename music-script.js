@@ -26,6 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarMusicasDaAPI();
     criarBotaoFlutuanteMenu();
     configurarArrastePlayer();
+    checarEstadoSessaoNav();
 });
 
 function alternarModoNoturno(event) {
@@ -43,9 +44,8 @@ function alternarModoNoturno(event) {
     fecharMenu();
 }
 
-// Simulação de verificação de login (você pode integrar com o Supabase ou localStorage do seu site)
+// Verificação robusta de login baseada no Supabase e no localStorage
 function usuarioEstaLogado() {
-    // Altere para a sua lógica real de login, ex: localStorage.getItem('usuarioLogado')
     return localStorage.getItem('usuarioLogado') === 'true';
 }
 
@@ -61,6 +61,30 @@ function verificarLoginOuBloquear() {
 function fecharModalLogin() {
     const modal = document.getElementById('loginGlassModal');
     if (modal) modal.classList.add('oculto');
+}
+
+// Salva a página atual na memória antes de ir para o login[cite: 4]
+function irParaLogin() {
+    localStorage.setItem('paginaRetorno', window.location.href);
+    window.location.href = 'login.html';
+}
+
+// Gerencia o botão da barra superior (Login / Sair)
+function checarEstadoSessaoNav() {
+    const btnLoginNav = document.getElementById('btnLoginNav');
+    if (!btnLoginNav) return;
+
+    if (usuarioEstaLogado()) {
+        btnLoginNav.innerText = 'Sair';
+        btnLoginNav.onclick = () => {
+            localStorage.setItem('usuarioLogado', 'false');
+            localStorage.removeItem('nomeUsuario');
+            window.location.reload();
+        };
+    } else {
+        btnLoginNav.innerText = 'Login';
+        btnLoginNav.onclick = irParaLogin;
+    }
 }
 
 async function carregarMusicasDaAPI() {
@@ -474,10 +498,6 @@ function fecharMenuPorFora(event) {
     if (event.target.id === 'menuOverlay') {
         fecharMenu();
     }
-}
-
-function irParaLogin() {
-    window.location.href = 'login.html';
 }
 
 function criarBotaoFlutuanteMenu() {

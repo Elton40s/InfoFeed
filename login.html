@@ -206,6 +206,18 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const errorContainer = document.getElementById('errorContainer');
 
+        async function finalizarLoginESeguir(user) {
+            const apelido = user.email ? user.email.split('@')[0] : 'usuario';
+            localStorage.setItem('usuarioLogado', 'true');
+            localStorage.setItem('nomeUsuario', apelido);
+
+            // Resgata a página de onde o usuário veio (ou vai para index.html se não houver registro)[cite: 3, 4]
+            const paginaDestino = localStorage.getItem('paginaRetorno') || 'index.html';
+            localStorage.removeItem('paginaRetorno');
+            
+            window.location.href = paginaDestino;
+        }
+
         async function entrarOuCadastrar() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
@@ -227,19 +239,18 @@
                 data = signUpData;
             }
 
-            if (data.user) {
-                const apelido = data.user.email.split('@')[0];
-                localStorage.setItem('usuarioLogado', apelido);
-                alert('Login realizado com sucesso!');
-                window.location.href = 'index.html';
+            if (data.user || data.session) {
+                const user = data.user || data.session.user;
+                await finalizarLoginESeguir(user);
             }
         }
 
         async function loginComGoogle() {
+            const paginaAtualAntesDoLogin = localStorage.getItem('paginaRetorno') || 'index.html';
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: { 
-                    redirectTo: window.location.origin + '/index.html',
+                    redirectTo: window.location.origin + '/' + paginaAtualAntesDoLogin.split('/').pop(),
                     queryParams: {
                         prompt: 'select_account'
                     }
@@ -247,6 +258,13 @@
             });
             if (error) errorContainer.innerText = error.message;
         }
+
+        // Verifica se o usuário acabou de voltar autenticado do Google
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (session && session.user) {
+                await finalizarLoginESeguir(session.user);
+            }
+        });
     </script>
 </body>
 </html>
