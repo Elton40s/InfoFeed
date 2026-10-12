@@ -124,7 +124,7 @@
     color: var(--sub-text);
 }
 
-/* PLAYER POP-UP FLUTUANTE TRANSLÚCIDO E ARRASTÁVEL (NORMAL POR PADRÃO) */
+/* PLAYER POP-UP FLUTUANTE TRANSLÚCIDO E ARRASTÁVEL */
 .music-player-bar {
     position: fixed;
     bottom: 20px;
@@ -145,7 +145,6 @@
     cursor: grab;
     user-select: none;
     touch-action: none;
-    transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
 }
 
 .music-player-bar.oculto {
@@ -295,33 +294,6 @@
     accent-color: #10b981;
     cursor: pointer;
     height: 4px;
-}
-
-/* ESTADO COMPACTO (SÓ ATIVADO QUANDO CLICADO NO BOTÃO DE MINIMIZAR OU FORA) */
-.music-player-bar.compacto {
-    width: 230px !important;
-    padding: 8px !important;
-}
-
-.music-player-bar.compacto .player-header-bar span {
-    display: none;
-}
-
-.music-player-bar.compacto .player-extra-controls,
-.music-player-bar.compacto .player-artist,
-.music-player-bar.compacto .player-ctrl-btn:not(.play-main-btn) {
-    display: none;
-}
-
-.music-player-bar.compacto .player-cover {
-    width: 34px;
-    height: 34px;
-}
-
-.music-player-bar.compacto .play-main-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
 }
 
 /* BOTÃO FLUTUANTE VERDE */
