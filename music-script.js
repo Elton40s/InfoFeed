@@ -47,7 +47,7 @@ async function carregarMusicasDaAPI() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = '<div class="loading-text">Conectando à Jamendo... 🎵</div>';
 
-    const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total&include=musicinfo`;
+    const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total`;
 
     try {
         const resposta = await fetch(urlAPI);
@@ -65,12 +65,11 @@ async function carregarMusicasDaAPI() {
     }
 }
 
-// Nova função para Lançamentos (ordenado por data de lançamento / mais recente)
 async function carregarLancamentos() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = '<div class="loading-text">Buscando últimos lançamentos... 🚀</div>';
 
-    const urlLancamentos = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=releasedate_desc&include=musicinfo`;
+    const urlLancamentos = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=releasedate_desc`;
 
     try {
         const resposta = await fetch(urlLancamentos);
@@ -107,7 +106,7 @@ async function buscarPorTagAPI(tag) {
     if (!subContainer) return;
     subContainer.innerHTML = '<div class="loading-text">Buscando estilo na API...</div>';
 
-    const urlTag = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16&include=musicinfo`;
+    const urlTag = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16`;
 
     try {
         const resposta = await fetch(urlTag);
@@ -146,17 +145,29 @@ async function carregarRadios() {
                 const card = document.createElement('div');
                 card.className = 'music-card';
                 card.innerHTML = `
-                    <div class="music-card-img-wrapper">
+                    <div class="music-card-img-wrapper" onclick="tocarRadioStream('${radio.stream}', '${radio.dispname}', '${radio.image}')">
                         <img src="${radio.image || 'https://ui-avatars.com/api/?name=Radio&background=10b981&color=fff'}" alt="${radio.dispname}" class="music-card-img">
+                        <div class="music-play-overlay">
+                            <div class="music-play-icon">▶</div>
+                        </div>
                     </div>
                     <div class="music-card-info">
-                        <span class="music-card-title">${radio.dispname}</span>
-                        <span class="music-card-artist">Rádio Online Jamendo</span>
+                        <div class="music-card-header-flex">
+                            <div class="music-card-titles-box" onclick="tocarRadioStream('${radio.stream}', '${radio.dispname}', '${radio.image}')">
+                                <span class="music-card-title">${radio.dispname}</span>
+                                <span class="music-card-artist">Rádio Online Jamendo</span>
+                            </div>
+                            <div class="jamendo-logo-container" onclick="irParaSiteJamendo(event)" title="Visitar site do Jamendo">
+                                <img src="https://img.icons8.com/color/96/jamendo.png" alt="Jamendo Logo" class="jamendo-round-logo">
+                                <span class="jamendo-logo-label">Jamendo</span>
+                            </div>
+                        </div>
+                        <div class="music-card-footer-meta">
+                            <span>2026</span>
+                            <span>🎧 Ao Vivo</span>
+                        </div>
                     </div>
                 `;
-                card.onclick = () => {
-                    tocarRadioStream(radio.stream, radio.dispname, radio.image);
-                };
                 grid.appendChild(card);
             });
             container.appendChild(grid);
@@ -186,20 +197,15 @@ function criarCardElemento(track, index) {
     
     const imagemCapa = track.album_image || track.image || 'https://ui-avatars.com/api/?name=Music&background=10b981&color=fff';
     
-    // Extrai o ano da data de lançamento
     let anoMusica = "2026";
     if (track.releasedate) {
         anoMusica = track.releasedate.split('-')[0];
     }
 
-    // Formata o número de vezes ouvida (popularity ou listens se disponível)
     const totalOuvidas = track.stats && track.stats.rate_listen_total ? Number(track.stats.rate_listen_total).toLocaleString('pt-BR') : Math.floor(Math.random() * 5000 + 300);
 
-    // Foto redonda do artista no lado oposto (fallback para avatar gerado se não houver foto)
-    const fotoArtista = track.artist_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(track.artist_name)}&background=10b981&color=fff`;
-
     card.innerHTML = `
-        <div class="music-card-img-wrapper">
+        <div class="music-card-img-wrapper" onclick="selecionarEIniciarMusica(${index})">
             <img src="${imagemCapa}" alt="${track.name}" class="music-card-img">
             <div class="music-play-overlay">
                 <div class="music-play-icon">▶</div>
@@ -207,24 +213,32 @@ function criarCardElemento(track, index) {
         </div>
         <div class="music-card-info">
             <div class="music-card-header-flex">
-                <div class="music-card-titles-box">
+                <div class="music-card-titles-box" onclick="selecionarEIniciarMusica(${index})">
                     <span class="music-card-title">${track.name}</span>
                     <span class="music-card-artist">${track.artist_name}</span>
                 </div>
-                <div class="artist-avatar-container" title="${track.artist_name}">
-                    <img src="${fotoArtista}" alt="${track.artist_name}" class="artist-round-img" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(track.artist_name)}&background=10b981&color=fff'">
-                    <span class="artist-name-mini">${track.artist_name}</span>
+                <div class="jamendo-logo-container" onclick="irParaSiteJamendo(event)" title="Visitar site oficial do Jamendo">
+                    <img src="https://img.icons8.com/color/96/jamendo.png" alt="Jamendo Logo" class="jamendo-round-logo">
+                    <span class="jamendo-logo-label">Jamendo</span>
                 </div>
             </div>
             <div class="music-card-footer-meta">
-                <span>📅 ${anoMusica}</span>
+                <span>${anoMusica}</span>
                 <span>🎧 ${totalOuvidas} reproduções</span>
             </div>
         </div>
     `;
 
-    card.onclick = () => selecionarEIniciarMusica(index);
     return card;
+}
+
+// Função que exibe pop-up de confirmação antes de redirecionar para o site do Jamendo
+function irParaSiteJamendo(event) {
+    event.stopPropagation();
+    const confirmar = confirm("Deseja ir para a página oficial do Jamendo?");
+    if (confirmar) {
+        window.open("https://www.jamendo.com", "_blank");
+    }
 }
 
 function selecionarEIniciarMusica(index) {
