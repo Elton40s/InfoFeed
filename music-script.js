@@ -2,6 +2,11 @@ const JAMENDO_CLIENT_ID = 'f61f517b';
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
+const SUPABASE_URL = 'https://edrmehdyusznzdltlhxz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkcm1laGR5dXN6bnpkbHRsaHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMjcxMDUsImV4cCI6MjEwNTgwMzEwNX0.TDclKranm8q1Zcb2ngv6lgflM4yU5fpANLVuyJer6gk';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 if (!localStorage.getItem('modoNoturno')) {
     localStorage.setItem('modoNoturno', 'ativo');
 }
@@ -26,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarMusicasDaAPI();
     criarBotaoFlutuanteMenu();
     configurarArrastePlayer();
-    checarEstadoSessaoNav();
+    atualizarEstadoUsuarioMusicas();
 });
 
 function alternarModoNoturno(event) {
@@ -44,13 +49,16 @@ function alternarModoNoturno(event) {
     fecharMenu();
 }
 
-// Verificação robusta de login baseada no Supabase e no localStorage
-function usuarioEstaLogado() {
-    return localStorage.getItem('usuarioLogado') === 'true';
+// Verifica de forma assíncrona se há sessão ativa no Supabase ou LocalStorage
+async function usuarioEstaLogado() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session && session.user) return true;
+    return !!localStorage.getItem('usuarioLogado');
 }
 
-function verificarLoginOuBloquear() {
-    if (!usuarioEstaLogado()) {
+async function verificarLoginOuBloquear() {
+    const logado = await usuarioEstaLogado();
+    if (!logado) {
         const modal = document.getElementById('loginGlassModal');
         if (modal) modal.classList.remove('oculto');
         return false;
@@ -63,28 +71,57 @@ function fecharModalLogin() {
     if (modal) modal.classList.add('oculto');
 }
 
-// Salva a página atual na memória antes de ir para o login[cite: 4]
+// Salva a página atual na memória antes de ir para o login para retornar depois
 function irParaLogin() {
     localStorage.setItem('paginaRetorno', window.location.href);
     window.location.href = 'login.html';
 }
 
-// Gerencia o botão da barra superior (Login / Sair)
-function checarEstadoSessaoNav() {
-    const btnLoginNav = document.getElementById('btnLoginNav');
-    if (!btnLoginNav) return;
+// Atualiza o botão de Login/Avatar na barra superior de forma idêntica à página principal
+async function atualizarEstadoUsuarioMusicas() {
+    const userNavContainer = document.getElementById('userNavContainer');
+    if (!userNavContainer) return;
 
-    if (usuarioEstaLogado()) {
-        btnLoginNav.innerText = 'Sair';
-        btnLoginNav.onclick = () => {
-            localStorage.setItem('usuarioLogado', 'false');
-            localStorage.removeItem('nomeUsuario');
-            window.location.reload();
-        };
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (session && session.user) {
+        const emailUser = session.user.email;
+        let apelidoSalvo = localStorage.getItem('usuarioApelidoCustom') || emailUser.split('@')[0];
+        localStorage.setItem('usuarioLogado', apelidoSalvo);
+        
+        const iniciais = emailUser.substring(0, 2).toUpperCase();
+        
+        userNavContainer.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="user-avatar-badge" title="${emailUser}">${iniciais}</div>
+                <button class="logout-icon-btn" onclick="executarLogoutMusicas()" title="Sair da conta" style="background:none; border:none; cursor:pointer; color:var(--text-main);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        `;
     } else {
-        btnLoginNav.innerText = 'Login';
-        btnLoginNav.onclick = irParaLogin;
+        const usuarioLocal = localStorage.getItem('usuarioLogado');
+        if (usuarioLocal && usuarioLocal !== 'false') {
+            const iniciais = usuarioLocal.substring(0, 2).toUpperCase();
+            userNavContainer.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="user-avatar-badge" title="${usuarioLocal}">${iniciais}</div>
+                    <button class="logout-icon-btn" onclick="executarLogoutMusicas()" title="Sair da conta" style="background:none; border:none; cursor:pointer; color:var(--text-main);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    </button>
+                </div>
+            `;
+        } else {
+            userNavContainer.innerHTML = `<button class="btn-login" id="btnLoginNav" onclick="irParaLogin()">Login</button>`;
+        }
     }
+}
+
+async function executarLogoutMusicas() {
+    await supabaseClient.auth.signOut();
+    localStorage.removeItem('usuarioLogado');
+    localStorage.removeItem('usuarioApelidoCustom');
+    window.location.reload();
 }
 
 async function carregarMusicasDaAPI() {
@@ -284,8 +321,9 @@ function irParaSiteJamendo(event) {
     }
 }
 
-function selecionarEIniciarMusica(index) {
-    if (!verificarLoginOuBloquear()) return;
+async function selecionarEIniciarMusica(index) {
+    const autorizado = await verificarLoginOuBloquear();
+    if (!autorizado) return;
 
     indiceMusicaAtual = index;
     const track = listaMusicasAtual[index];
@@ -303,8 +341,9 @@ function selecionarEIniciarMusica(index) {
     playerBar.classList.remove('oculto');
 }
 
-function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
-    if (!verificarLoginOuBloquear()) return;
+async function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
+    const autorizado = await verificarLoginOuBloquear();
+    if (!autorizado) return;
 
     const audioEl = document.getElementById('audioElement');
     audioEl.src = streamUrl;
@@ -329,8 +368,9 @@ function fecharPlayerTotalmente(event) {
     playerBar.classList.add('oculto');
 }
 
-function alternarPlayPause() {
-    if (!verificarLoginOuBloquear()) return;
+async function alternarPlayPause() {
+    const autorizado = await verificarLoginOuBloquear();
+    if (!autorizado) return;
 
     const audioEl = document.getElementById('audioElement');
     const btn = document.getElementById('playPauseBtn');
