@@ -194,9 +194,16 @@ function selecionarEIniciarMusica(index) {
     document.getElementById('playerCover').src = track.album_image || track.image || 'https://ui-avatars.com/api/?name=Music&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
 
-    // Exibe o player quando uma música é selecionada
+    // Exibe o player e garante que ele abre no tamanho normal (não compacto)
     const playerBar = document.getElementById('musicPlayerBar');
     playerBar.classList.remove('oculto');
+    playerBar.classList.remove('compacto');
+    
+    const btnMin = document.getElementById('minimizePlayerBtn');
+    if(btnMin) {
+        btnMin.innerText = '−';
+        btnMin.title = 'Minimizar / Compactar';
+    }
 }
 
 function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
@@ -209,8 +216,16 @@ function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
     document.getElementById('playerCover').src = imagemRadio || 'https://ui-avatars.com/api/?name=Radio&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
 
+    // Exibe o player e garante que ele abre no tamanho normal (não compacto)
     const playerBar = document.getElementById('musicPlayerBar');
     playerBar.classList.remove('oculto');
+    playerBar.classList.remove('compacto');
+    
+    const btnMin = document.getElementById('minimizePlayerBtn');
+    if(btnMin) {
+        btnMin.innerText = '−';
+        btnMin.title = 'Minimizar / Compactar';
+    }
 }
 
 function fecharPlayerTotalmente(event) {
@@ -266,7 +281,6 @@ function mudarAbaMusica(tipo, btnEl) {
     if (tipo === 'radios') carregarRadios();
 }
 
-// Configuração completa de arraste para Mouse e Dispositivos Touch (Celular/Tablet)
 function configurarArrastePlayer() {
     const playerBar = document.getElementById('musicPlayerBar');
     let isDragging = false;
@@ -309,7 +323,6 @@ function configurarArrastePlayer() {
         playerBar.style.top = `${newTop}px`;
     };
 
-    // Eventos Mouse
     playerBar.addEventListener('mousedown', (e) => {
         if (startDrag(e.clientX, e.clientY, e.target)) {
             document.addEventListener('mousemove', onMouseMove);
@@ -323,7 +336,6 @@ function configurarArrastePlayer() {
         document.removeEventListener('mouseup', onMouseUp);
     }
 
-    // Eventos Touch (Celular e Tablet)
     playerBar.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
             const touch = e.touches[0];
@@ -347,7 +359,6 @@ function configurarArrastePlayer() {
     }
 }
 
-// Minimiza se clicar fora, e expande se clicar na caixa minimizada
 function configurarCliqueForaPlayer() {
     const playerBar = document.getElementById('musicPlayerBar');
 
@@ -357,7 +368,6 @@ function configurarCliqueForaPlayer() {
         const clicouNoPlayer = playerBar.contains(e.target);
 
         if (!clicouNoPlayer) {
-            // Clicou fora: se estiver expandido, minimiza para melhor navegação
             if (!playerBar.classList.contains('compacto')) {
                 playerBar.classList.add('compacto');
                 const btnMin = document.getElementById('minimizePlayerBtn');
@@ -367,9 +377,7 @@ function configurarCliqueForaPlayer() {
                 }
             }
         } else {
-            // Clicou dentro da caixa: se estiver compacto, expande de volta
             if (playerBar.classList.contains('compacto')) {
-                // Evita expandir se clicou especificamente no botão de minimizar/fechar
                 if (!e.target.classList.contains('player-minimize-btn')) {
                     playerBar.classList.remove('compacto');
                     const btnMin = document.getElementById('minimizePlayerBtn');
