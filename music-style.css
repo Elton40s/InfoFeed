@@ -1,4 +1,3 @@
-/* Animação personalizada de pulso verde para a logo FeedMusic */
 @keyframes pulseMusicFeed {
     0% { transform: scale(1); }
     50% { transform: scale(2); color: #10b981; }
@@ -8,17 +7,6 @@
 .animate-logo .logo-feed {
     animation: pulseMusicFeed 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     animation-delay: 0.3s;
-}
-
-/* Faixa ticker mais escura personalizada para o FeedMusic */
-.music-ticker-dark {
-    background-color: rgba(18, 18, 18, 0.8) !important;
-    border-top: 1px solid rgba(16, 185, 129, 0.3) !important;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.3) !important;
-}
-
-.music-ticker-dark .weather-ticker-track {
-    color: #10b981;
 }
 
 .music-tabs-container {
@@ -136,36 +124,81 @@
     color: var(--sub-text);
 }
 
-/* PLAYER FLUTUANTE NO RODAPÉ */
+/* PLAYER POP-UP FLUTUANTE TRANSLÚCIDO E ARRASTÁVEL */
 .music-player-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border-color);
-    padding: 12px 24px;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    background-color: rgba(30, 30, 30, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 3000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    cursor: grab;
+    user-select: none;
+    transition: width 0.3s ease, padding 0.3s ease;
+}
+
+.music-player-bar:active {
+    cursor: grabbing;
+}
+
+.player-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #10b981;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 6px;
+}
+
+.player-minimize-btn {
+    background: none;
+    border: none;
+    color: #a0a0a0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.player-minimize-btn:hover {
+    color: #10b981;
+}
+
+.player-main-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    z-index: 2500;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
-    color: var(--text-main);
+    gap: 12px;
 }
 
 .player-track-info {
     display: flex;
     align-items: center;
     gap: 12px;
-    max-width: 300px;
+    flex: 1;
+    overflow: hidden;
 }
 
 .player-cover {
-    width: 48px;
-    height: 48px;
-    border-radius: 6px;
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
     object-fit: cover;
     background-color: #2d2d2d;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .player-meta {
@@ -176,8 +209,8 @@
 
 .player-title {
     font-size: 14px;
-    font-weight: 600;
-    color: var(--text-main);
+    font-weight: 700;
+    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -185,7 +218,7 @@
 
 .player-artist {
     font-size: 12px;
-    color: var(--sub-text);
+    color: #a0a0a0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -194,25 +227,28 @@
 .player-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 4px;
 }
 
 .player-ctrl-btn {
     background: none;
     border: none;
-    color: var(--text-main);
+    color: #ffffff;
     font-size: 18px;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: transform 0.1s, color 0.2s;
 }
 
 .player-ctrl-btn:hover {
     color: #10b981;
+    transform: scale(1.1);
 }
 
 .play-main-btn {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     background-color: #10b981;
     border-radius: 50%;
     display: flex;
@@ -220,24 +256,67 @@
     justify-content: center;
     font-size: 16px;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .play-main-btn:hover {
     background-color: #059669;
-    color: #fff;
+}
+
+.player-extra-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+    color: #a0a0a0;
+}
+
+.player-progress-bar {
+    flex: 1;
+    accent-color: #10b981;
+    cursor: pointer;
+    height: 4px;
 }
 
 .player-volume-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .volume-slider {
-    width: 90px;
+    width: 70px;
     accent-color: #10b981;
     cursor: pointer;
+    height: 4px;
+}
+
+/* ESTADO COMPACTO */
+.music-player-bar.compacto {
+    width: 240px;
+    padding: 10px;
+}
+
+.music-player-bar.compacto .player-header-bar span {
+    display: none;
+}
+
+.music-player-bar.compacto .player-extra-controls,
+.music-player-bar.compacto .player-artist,
+.music-player-bar.compacto .player-ctrl-btn:not(.play-main-btn) {
+    display: none;
+}
+
+.music-player-bar.compacto .player-cover {
+    width: 38px;
+    height: 38px;
+}
+
+.music-player-bar.compacto .play-main-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
 }
 
 /* BOTÃO FLUTUANTE VERDE */
@@ -295,16 +374,9 @@
 
 @media (max-width: 768px) {
     .music-player-bar {
-        padding: 10px 14px;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .player-track-info {
-        width: 100%;
-        max-width: none;
-        justify-content: flex-start;
-    }
-    .player-volume-wrapper {
-        display: none;
+        width: 90%;
+        right: 5%;
+        left: 5%;
+        bottom: 10px;
     }
 }

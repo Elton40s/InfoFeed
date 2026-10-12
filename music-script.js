@@ -2,7 +2,6 @@ const JAMENDO_CLIENT_ID = 'f61f517b';
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
-// Define o modo noturno como padrão na primeira abertura
 if (!localStorage.getItem('modoNoturno')) {
     localStorage.setItem('modoNoturno', 'ativo');
 }
@@ -18,7 +17,6 @@ if (localStorage.getItem('modoNoturno') === 'ativo') {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Animação da logo superior configurada para disparar após 10 segundos (10000 ms)
     setTimeout(() => {
         document.querySelectorAll('.logo-animada-principal').forEach(el => {
             el.classList.add('animate-logo');
@@ -27,6 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     carregarMusicasDaAPI();
     criarBotaoFlutuanteMenu();
+    configurarArrastePlayer();
 });
 
 function alternarModoNoturno(event) {
@@ -249,6 +248,100 @@ function mudarAbaMusica(tipo, btnEl) {
     if (tipo === 'radios') carregarRadios();
 }
 
+function configurarArrastePlayer() {
+    const playerBar = document.getElementById('musicPlayerBar');
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    playerBar.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button') || e.target.closest('input')) {
+            return;
+        }
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+
+        const rect = playerBar.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        playerBar.style.bottom = 'auto';
+        playerBar.style.right = 'auto';
+        playerBar.style.left = `${initialLeft}px`;
+        playerBar.style.top = `${initialTop}px`;
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        const maxX = window.innerWidth - playerBar.offsetWidth;
+        const maxY = window.innerHeight - playerBar.offsetHeight;
+
+        newLeft = Math.max(10, Math.min(newLeft, maxX - 10));
+        newTop = Math.max(10, Math.min(newTop, maxY - 10));
+
+        playerBar.style.left = `${newLeft}px`;
+        playerBar.style.top = `${newTop}px`;
+    }
+
+    function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+}
+
+function alternarModoCompacto() {
+    const playerBar = document.getElementById('musicPlayerBar');
+    const btnMin = document.getElementById('minimizePlayerBtn');
+    
+    playerBar.classList.toggle('compacto');
+    if (playerBar.classList.contains('compacto')) {
+        btnMin.innerText = '+';
+        btnMin.title = 'Expandir Player';
+    } else {
+        btnMin.innerText = '−';
+        btnMin.title = 'Minimizar / Compactar';
+    }
+}
+
+function atualizarProgressoAudio() {
+    const audioEl = document.getElementById('audioElement');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationTimeEl = document.getElementById('durationTime');
+
+    if (audioEl.duration) {
+        const progressoPercent = (audioEl.currentTime / audioEl.duration) * 100;
+        progressBar.value = progressoPercent;
+
+        currentTimeEl.innerText = formatarTempo(audioEl.currentTime);
+        durationTimeEl.innerText = formatarTempo(audioEl.duration);
+    }
+}
+
+function buscarAudioPorProgresso(valorPercentual) {
+    const audioEl = document.getElementById('audioElement');
+    if (audioEl.duration) {
+        const novoTempo = (valorPercentual / 100) * audioEl.duration;
+        audioEl.currentTime = novoTempo;
+    }
+}
+
+function formatarTempo(segundos) {
+    const min = Math.floor(segundos / 60);
+    const sec = Math.floor(segundos % 60);
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
 function toggleMenu() {
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const menuOverlay = document.getElementById('menuOverlay');
@@ -271,7 +364,6 @@ function irParaLogin() {
     window.location.href = 'login.html';
 }
 
-// BOTÃO FLUTUANTE ARRASTÁVEL COM COR VERDE FEEDMUSIC
 function criarBotaoFlutuanteMenu() {
     if (document.getElementById('floatingMenuBtn')) return;
 
