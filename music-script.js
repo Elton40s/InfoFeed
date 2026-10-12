@@ -1,27 +1,32 @@
-const JAMENDO_CLIENT_ID = '56d30c95'; // Client ID padrão da comunidade para testes de desenvolvimento
+// Usando a estrutura padrão da API oficial da Jamendo: v3.0/tracks
+const JAMENDO_CLIENT_ID = '709fa152'; // Client ID oficial público de testes da documentação da Jamendo
 let listaMusicasAtual = [];
 let indiceMusicaAtual = 0;
 
 window.addEventListener('DOMContentLoaded', () => {
-    carregarMusicasTrending();
+    carregarMusicasDaAPI();
 });
 
-async function carregarMusicasTrending() {
+async function carregarMusicasDaAPI() {
     const container = document.getElementById('musicFeedContainer');
-    container.innerHTML = '<div class="loading-text">Buscando sucessos na Jamendo... 🎵</div>';
+    container.innerHTML = '<div class="loading-text">Conectando à Jamendo API... 🎵</div>';
+
+    // Montando a URL oficial da API: https://api.jamendo.com/v3.0/tracks/?client_id=...&format=json
+    const urlAPI = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=24&order=popularity_total`;
 
     try {
-        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=20&order=popularity_total`);
-        const data = await res.json();
+        const resposta = await fetch(urlAPI);
+        const dados = await resposta.json();
 
-        if (data && data.results && data.results.length > 0) {
-            listaMusicasAtual = data.results;
+        if (dados && dados.results && dados.results.length > 0) {
+            listaMusicasAtual = dados.results;
             renderizarGridMusicas(listaMusicasAtual);
         } else {
-            container.innerHTML = '<div class="loading-text">Nenhuma música encontrada no momento.</div>';
+            container.innerHTML = '<div class="loading-text">Nenhuma música retornada pela API.</div>';
         }
-    } catch (e) {
-        container.innerHTML = '<div class="loading-text">Erro ao conectar com a API da Jamendo.</div>';
+    } catch (erro) {
+        console.error("Erro na requisição da Jamendo:", erro);
+        container.innerHTML = '<div class="loading-text">Erro ao carregar dados da Jamendo API.</div>';
     }
 }
 
@@ -29,54 +34,59 @@ async function carregarGenerosMusicais() {
     const container = document.getElementById('musicFeedContainer');
     container.innerHTML = `
         <div style="width:100%; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:20px;">
-            <button onclick="buscarPorTag('pop')" class="music-tab-btn">Pop</button>
-            <button onclick="buscarPorTag('rock')" class="music-tab-btn">Rock</button>
-            <button onclick="buscarPorTag('electronic')" class="music-tab-btn">Eletrônica</button>
-            <button onclick="buscarPorTag('hiphop')" class="music-tab-btn">Hip-Hop</button>
-            <button onclick="buscarPorTag('jazz')" class="music-tab-btn">Jazz</button>
-            <button onclick="buscarPorTag('classical')" class="music-tab-btn">Clássica</button>
+            <button onclick="buscarPorTagAPI('pop')" class="music-tab-btn">Pop</button>
+            <button onclick="buscarPorTagAPI('rock')" class="music-tab-btn">Rock</button>
+            <button onclick="buscarPorTagAPI('electronic')" class="music-tab-btn">Eletrônica</button>
+            <button onclick="buscarPorTagAPI('hiphop')" class="music-tab-btn">Hip-Hop</button>
+            <button onclick="buscarPorTagAPI('jazz')" class="music-tab-btn">Jazz</button>
         </div>
         <div id="generoResults" class="music-grid" style="width:100%;"></div>
     `;
-    buscarPorTag('pop');
+    buscarPorTagAPI('pop');
 }
 
-async function buscarPorTag(tag) {
+async function buscarPorTagAPI(tag) {
     const subContainer = document.getElementById('generoResults');
-    if(!subContainer) return;
-    subContainer.innerHTML = '<div class="loading-text">Carregando estilo...</div>';
+    if (!subContainer) return;
+    subContainer.innerHTML = '<div class="loading-text">Buscando estilo na API...</div>';
+
+    const urlTag = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16`;
 
     try {
-        const res = await fetch(`https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&tags=${tag}&limit=16`);
-        const data = await res.json();
-        if (data && data.results && data.results.length > 0) {
-            listaMusicasAtual = data.results;
+        const resposta = await fetch(urlTag);
+        const dados = await resposta.json();
+
+        if (dados && dados.results && dados.results.length > 0) {
+            listaMusicasAtual = dados.results;
             subContainer.innerHTML = '';
-            data.results.forEach((track, index) => {
+            dados.results.forEach((track, index) => {
                 subContainer.appendChild(criarCardElemento(track, index));
             });
         } else {
-            subContainer.innerHTML = '<div class="loading-text">Nenhuma música para este estilo.</div>';
+            subContainer.innerHTML = '<div class="loading-text">Nenhuma faixa encontrada para este estilo.</div>';
         }
     } catch (e) {
-        subContainer.innerHTML = '<div class="loading-text">Erro ao carregar estilo.</div>';
+        subContainer.innerHTML = '<div class="loading-text">Erro ao buscar estilo.</div>';
     }
 }
 
 async function carregarRadios() {
     const container = document.getElementById('musicFeedContainer');
-    container.innerHTML = '<div class="loading-text">Carregando rádios...</div>';
+    container.innerHTML = '<div class="loading-text">Carregando rádios da Jamendo...</div>';
+
+    // Rota oficial de rádios: v3.0/radios
+    const urlRadios = `https://api.jamendo.com/v3.0/radios/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=12`;
 
     try {
-        const res = await fetch(`https://api.jamendo.com/v3.0/radios/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=12`);
-        const data = await res.json();
+        const resposta = await fetch(urlRadios);
+        const dados = await resposta.json();
 
-        if (data && data.results && data.results.length > 0) {
+        if (dados && dados.results && dados.results.length > 0) {
             container.innerHTML = '';
             const grid = document.createElement('div');
             grid.className = 'music-grid';
 
-            data.results.forEach((radio) => {
+            dados.results.forEach((radio) => {
                 const card = document.createElement('div');
                 card.className = 'music-card';
                 card.innerHTML = `
@@ -95,10 +105,10 @@ async function carregarRadios() {
             });
             container.appendChild(grid);
         } else {
-            container.innerHTML = '<div class="loading-text">Nenhuma rádio disponível no momento.</div>';
+            container.innerHTML = '<div class="loading-text">Nenhuma rádio disponível.</div>';
         }
     } catch (e) {
-        container.innerHTML = '<div class="loading-text">Erro ao carregar rádios.</div>';
+        container.innerHTML = '<div class="loading-text">Erro ao conectar com as rádios.</div>';
     }
 }
 
@@ -142,7 +152,7 @@ function selecionarEIniciarMusica(index) {
     const audioEl = document.getElementById('audioElement');
     
     audioEl.src = track.audio;
-    audioEl.play().catch(err => console.log("Erro ao reproduzir áudio:", err));
+    audioEl.play().catch(err => console.log("Erro de reprodução:", err));
 
     document.getElementById('playerTitle').innerText = track.name;
     document.getElementById('playerArtist').innerText = track.artist_name;
@@ -153,10 +163,10 @@ function selecionarEIniciarMusica(index) {
 function tocarRadioStream(streamUrl, nomeRadio, imagemRadio) {
     const audioEl = document.getElementById('audioElement');
     audioEl.src = streamUrl;
-    audioEl.play().catch(err => console.log("Erro ao reproduzir rádio:", err));
+    audioEl.play().catch(err => console.log("Erro de reprodução rádio:", err));
 
     document.getElementById('playerTitle').innerText = nomeRadio;
-    document.getElementById('playerArtist').innerText = 'Rádio Jamendo';
+    document.getElementById('playerArtist').innerText = 'Rádio Ao Vivo';
     document.getElementById('playerCover').src = imagemRadio || 'https://ui-avatars.com/api/?name=Radio&background=10b981&color=fff';
     document.getElementById('playPauseBtn').innerText = '❚❚';
 }
@@ -199,7 +209,7 @@ function mudarAbaMusica(tipo, btnEl) {
     document.querySelectorAll('.music-tab-btn').forEach(b => b.classList.remove('active'));
     btnEl.classList.add('active');
 
-    if (tipo === 'trending') carregarMusicasTrending();
+    if (tipo === 'trending') carregarMusicasDaAPI();
     if (tipo === 'genres') carregarGenerosMusicais();
     if (tipo === 'radios') carregarRadios();
 }
